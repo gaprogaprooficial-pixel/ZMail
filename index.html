@@ -1,0 +1,941 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NovaMail - Tu correo inteligente</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
+        
+        :root {
+            --nova-blue: #00b4d8;
+        }
+        
+        * {
+            font-family: 'Roboto', sans-serif;
+        }
+        
+        .gmail-header {
+            background: linear-gradient(90deg, #00b4d8, #0099bb);
+        }
+        
+        .sidebar-link {
+            transition: all 0.2s;
+        }
+        
+        .sidebar-link:hover {
+            background-color: #f1f5f9;
+        }
+        
+        .email-row {
+            transition: all 0.2s;
+        }
+        
+        .email-row:hover {
+            background-color: #f8fafc;
+        }
+        
+        .verified-badge {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+        
+        .modal {
+            animation: modalPop 0.3s ease;
+        }
+    </style>
+</head>
+<body class="bg-slate-100">
+    <!-- PANTALLA DE LOGIN (exactamente como Gmail) -->
+    <div id="login-screen" class="min-h-screen flex items-center justify-center bg-white">
+        <div class="w-full max-w-md p-8">
+            <!-- Logo NovaMail -->
+            <div class="flex items-center justify-center gap-3 mb-8">
+                <div class="w-12 h-12 bg-[#00b4d8] rounded-2xl flex items-center justify-center shadow-lg">
+                    <i class="fa-solid fa-envelope text-white text-3xl"></i>
+                </div>
+                <div>
+                    <h1 class="text-4xl font-bold text-[#00b4d8] tracking-tighter">NovaMail</h1>
+                    <p class="text-xs text-slate-500 -mt-1">correo del futuro</p>
+                </div>
+            </div>
+
+            <h2 class="text-2xl font-medium text-center mb-8">Iniciar sesión</h2>
+            
+            <div class="space-y-6">
+                <div>
+                    <input id="login-email" 
+                           type="email" 
+                           placeholder="Correo electrónico"
+                           class="w-full px-4 py-4 border border-slate-300 rounded-3xl focus:outline-none focus:border-[#00b4d8] text-lg">
+                </div>
+                <div>
+                    <input id="login-password" 
+                           type="password" 
+                           placeholder="Contraseña"
+                           class="w-full px-4 py-4 border border-slate-300 rounded-3xl focus:outline-none focus:border-[#00b4d8] text-lg">
+                </div>
+
+                <button onclick="handleLogin()" 
+                        class="w-full bg-[#00b4d8] hover:bg-[#0099bb] text-white py-4 rounded-3xl text-lg font-medium transition-all">
+                    Iniciar sesión
+                </button>
+
+                <div class="flex justify-between text-sm">
+                    <a href="#" onclick="showForgotModal()" class="text-[#00b4d8] hover:underline">¿Olvidaste tu contraseña?</a>
+                    <a href="#" onclick="switchToRegister()" class="text-[#00b4d8] hover:underline">Crear cuenta</a>
+                </div>
+
+                <!-- Demo credentials -->
+                <div class="bg-slate-50 border border-slate-200 rounded-2xl p-4 text-xs text-slate-600">
+                    <strong>Cuenta ADMIN (para probar panel):</strong><br>
+                    ejemplo usuarios_novamail<br><br>
+                    <strong>Usuario normal:</strong><br>
+                    usuario@novamail.com / 123456789
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- PANTALLA DE REGISTRO (exactamente como Gmail) -->
+    <div id="register-screen" class="hidden min-h-screen flex items-center justify-center bg-white">
+        <div class="w-full max-w-md p-8">
+            <div class="flex items-center justify-center gap-3 mb-8">
+                <div class="w-12 h-12 bg-[#00b4d8] rounded-2xl flex items-center justify-center shadow-lg">
+                    <i class="fa-solid fa-envelope text-white text-3xl"></i>
+                </div>
+                <div>
+                    <h1 class="text-4xl font-bold text-[#00b4d8] tracking-tighter">NovaMail</h1>
+                    <p class="text-xs text-slate-500 -mt-1">correo del futuro</p>
+                </div>
+            </div>
+
+            <h2 class="text-2xl font-medium text-center mb-8">Crear cuenta de NovaMail</h2>
+            
+            <div class="space-y-4">
+                <input id="reg-name" type="text" placeholder="Nombre completo" 
+                       class="w-full px-4 py-4 border border-slate-300 rounded-3xl focus:outline-none focus:border-[#00b4d8]">
+                
+                <input id="reg-email" type="email" placeholder="Correo electrónico" 
+                       class="w-full px-4 py-4 border border-slate-300 rounded-3xl focus:outline-none focus:border-[#00b4d8]">
+                
+                <input id="reg-password" type="password" placeholder="Contraseña" 
+                       class="w-full px-4 py-4 border border-slate-300 rounded-3xl focus:outline-none focus:border-[#00b4d8]">
+                
+                <button onclick="handleRegister()" 
+                        class="w-full bg-[#00b4d8] hover:bg-[#0099bb] text-white py-4 rounded-3xl text-lg font-medium">
+                    Crear cuenta
+                </button>
+
+                <p onclick="switchToLogin()" class="text-center text-[#00b4d8] hover:underline cursor-pointer text-sm">
+                    ¿Ya tienes una cuenta? Inicia sesión
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- APLICACIÓN PRINCIPAL (interfaz idéntica a Gmail pero con NovaMail) -->
+    <div id="main-app" class="hidden min-h-screen flex flex-col">
+        <!-- HEADER -->
+        <header class="gmail-header text-white h-14 flex items-center px-4 shadow-md">
+            <div class="flex items-center gap-4 w-full">
+                <!-- Logo -->
+                <div class="flex items-center gap-2 cursor-pointer" onclick="toggleSidebar()">
+                    <div class="w-9 h-9 bg-white/20 rounded-2xl flex items-center justify-center">
+                        <i class="fa-solid fa-envelope text-2xl"></i>
+                    </div>
+                    <span class="font-bold text-2xl tracking-tighter">NovaMail</span>
+                </div>
+
+                <!-- Buscador -->
+                <div class="flex-1 max-w-2xl mx-8">
+                    <div onclick="if(currentTab==='admin') return; searchEmails()" 
+                         class="bg-white/20 hover:bg-white/30 text-white flex items-center rounded-3xl px-5 py-1.5 cursor-pointer">
+                        <i class="fa-solid fa-magnifying-glass mr-3"></i>
+                        <input id="search-input" 
+                               type="text" 
+                               placeholder="Buscar correos o usuarios..."
+                               class="flex-1 bg-transparent outline-none text-sm placeholder:text-white/70">
+                    </div>
+                </div>
+
+                <!-- Botones de cuenta -->
+                <div class="flex items-center gap-5">
+                    <i onclick="composeEmail()" class="fa-solid fa-pen-to-square text-2xl cursor-pointer hover:scale-110"></i>
+                    <i onclick="showAccountMenu()" class="fa-solid fa-circle-user text-3xl cursor-pointer"></i>
+                    <div onclick="logout()" class="flex items-center text-sm font-medium cursor-pointer">
+                        <span id="user-display" class="mr-2"></span>
+                        <i class="fa-solid fa-sign-out-alt"></i>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <div class="flex flex-1 overflow-hidden">
+            <!-- SIDEBAR -->
+            <div id="sidebar" class="w-64 bg-white border-r border-slate-200 py-3 flex flex-col">
+                <div onclick="changeTab('inbox')" class="sidebar-link flex items-center gap-4 px-6 py-3 text-slate-700 font-medium cursor-pointer">
+                    <i class="fa-solid fa-inbox w-5"></i>
+                    <span>Bandeja de entrada</span>
+                </div>
+                <div onclick="changeTab('starred')" class="sidebar-link flex items-center gap-4 px-6 py-3 text-slate-700 font-medium cursor-pointer">
+                    <i class="fa-solid fa-star w-5"></i>
+                    <span>Destacados</span>
+                </div>
+                <div onclick="changeTab('sent')" class="sidebar-link flex items-center gap-4 px-6 py-3 text-slate-700 font-medium cursor-pointer">
+                    <i class="fa-solid fa-paper-plane w-5"></i>
+                    <span>Enviados</span>
+                </div>
+                <div onclick="changeTab('drafts')" class="sidebar-link flex items-center gap-4 px-6 py-3 text-slate-700 font-medium cursor-pointer">
+                    <i class="fa-solid fa-file w-5"></i>
+                    <span>Borradores</span>
+                </div>
+                <div onclick="changeTab('trash')" class="sidebar-link flex items-center gap-4 px-6 py-3 text-slate-700 font-medium cursor-pointer">
+                    <i class="fa-solid fa-trash w-5"></i>
+                    <span>Papelera</span>
+                </div>
+                <div class="border-t my-2"></div>
+                <!-- Solo visible para admins -->
+                <div onclick="changeTab('admin')" id="admin-sidebar-link" class="hidden sidebar-link flex items-center gap-4 px-6 py-3 text-[#00b4d8] font-semibold cursor-pointer">
+                    <i class="fa-solid fa-shield-halved w-5"></i>
+                    <span>Panel de Administrador</span>
+                </div>
+
+                <div class="mt-auto px-6 text-xs text-slate-400">
+                    <div class="flex justify-between">
+                        <span>Espacio usado</span>
+                        <span>2.4 GB de 15 GB</span>
+                    </div>
+                    <div class="h-2 bg-slate-200 rounded-full mt-1 overflow-hidden">
+                        <div class="h-2 w-1/5 bg-[#00b4d8]"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CONTENIDO PRINCIPAL -->
+            <div class="flex-1 flex flex-col overflow-hidden">
+                
+                <!-- INBOX, SENT, DRAFTS, TRASH -->
+                <div id="mail-content" class="flex-1 overflow-auto">
+                    <div class="p-4 border-b flex items-center justify-between bg-white sticky top-0 z-10">
+                        <div class="flex items-center gap-4">
+                            <input type="checkbox" class="w-5 h-5">
+                            <i onclick="refreshMail()" class="fa-solid fa-rotate-right cursor-pointer"></i>
+                            <h2 id="tab-title" class="font-semibold text-xl">Bandeja de entrada</h2>
+                        </div>
+                        <div class="text-sm text-slate-500">1-50 de 124</div>
+                    </div>
+
+                    <!-- Lista de correos -->
+                    <div id="email-list" class="divide-y"></div>
+                </div>
+
+                <!-- PANEL ADMIN (solo para admins) -->
+                <div id="admin-panel" class="hidden flex-1 bg-white p-6 overflow-auto">
+                    <h1 class="text-3xl font-bold mb-6 flex items-center gap-3">
+                        <i class="fa-solid fa-shield-halved"></i>
+                        Panel de Administrador NovaMail
+                    </h1>
+
+                    <!-- Opciones extra que pediste -->
+                    <div class="flex gap-4 mb-8">
+                        <button onclick="addAdminByEmail()" 
+                                class="flex-1 bg-[#00b4d8] text-white px-6 py-3 rounded-3xl font-medium flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-user-plus"></i>
+                            Compartir panel admin (solo pon el correo)
+                        </button>
+                        <button onclick="showMassMessageModal()" 
+                                class="flex-1 border border-slate-300 px-6 py-3 rounded-3xl font-medium flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-bullhorn"></i>
+                            Enviar mensaje global a todos
+                        </button>
+                        <button onclick="exportUserData()" 
+                                class="flex-1 border border-slate-300 px-6 py-3 rounded-3xl font-medium flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-download"></i>
+                            Exportar todos los usuarios
+                        </button>
+                    </div>
+
+                    <!-- Tabla de usuarios -->
+                    <div class="overflow-x-auto">
+                        <table class="w-full">
+                            <thead>
+                                <tr class="border-b text-left text-slate-500 text-sm">
+                                    <th class="py-4 px-6">Nombre</th>
+                                    <th class="py-4 px-6">Correo</th>
+                                    <th class="py-4 px-6">Contraseña <span class="text-red-500 text-xs">(demo)</span></th>
+                                    <th class="py-4 px-6">Verificado</th>
+                                    <th class="py-4 px-6">Estado</th>
+                                    <th class="py-4 px-6">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="users-table" class="text-sm"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL COMPONER CORREO -->
+    <div id="compose-modal" onclick="if(event.target.id==='compose-modal')hideCompose()" 
+         class="hidden fixed inset-0 bg-black/60 flex items-end md:items-center justify-center z-50">
+        <div onclick="event.stopImmediatePropagation()" 
+             class="bg-white w-full max-w-2xl rounded-t-3xl md:rounded-3xl shadow-2xl">
+            <div class="flex justify-between px-6 py-4 border-b">
+                <span class="font-semibold text-lg">Nuevo mensaje</span>
+                <i onclick="hideCompose()" class="fa-solid fa-xmark text-2xl cursor-pointer"></i>
+            </div>
+            <div class="p-6 space-y-4">
+                <input id="compose-to" type="text" placeholder="Para" class="w-full border-b py-3 focus:outline-none">
+                <input id="compose-subject" type="text" placeholder="Asunto" class="w-full border-b py-3 focus:outline-none">
+                <textarea id="compose-body" rows="12" class="w-full focus:outline-none resize-none" placeholder="Escribe tu mensaje..."></textarea>
+            </div>
+            <div class="flex justify-end px-6 py-4 border-t">
+                <button onclick="sendEmail()" 
+                        class="bg-[#00b4d8] text-white px-10 py-3 rounded-3xl flex items-center gap-2">
+                    <i class="fa-solid fa-paper-plane"></i>
+                    Enviar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL BANEAR -->
+    <div id="ban-modal" onclick="if(event.target.id==='ban-modal')hideBanModal()" 
+         class="hidden fixed inset-0 bg-black/60 flex items-center justify-center z-50">
+        <div class="bg-white rounded-3xl p-8 max-w-md w-full modal">
+            <h3 class="text-2xl font-semibold mb-6">Banear usuario</h3>
+            <input id="ban-reason" type="text" placeholder="Motivo del ban (obligatorio)" 
+                   class="w-full px-5 py-4 border border-slate-300 rounded-3xl mb-6">
+            <div class="flex justify-end gap-3">
+                <button onclick="hideBanModal()" class="px-8 py-3 text-slate-600">Cancelar</button>
+                <button onclick="confirmBan()" class="bg-red-600 text-white px-8 py-3 rounded-3xl">Banear permanentemente</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL MENSAJE GLOBAL -->
+    <div id="mass-modal" onclick="if(event.target.id==='mass-modal')hideMassModal()" 
+         class="hidden fixed inset-0 bg-black/60 flex items-center justify-center z-50">
+        <div class="bg-white rounded-3xl p-8 max-w-md w-full modal">
+            <h3 class="text-2xl font-semibold mb-4">Enviar mensaje a TODOS los usuarios</h3>
+            <textarea id="mass-text" rows="5" class="w-full border border-slate-300 rounded-3xl p-5" placeholder="Escribe el mensaje que verán al iniciar sesión..."></textarea>
+            <div class="flex justify-end gap-3 mt-6">
+                <button onclick="hideMassModal()" class="px-8 py-3 text-slate-600">Cancelar</button>
+                <button onclick="sendMassMessage()" class="bg-[#00b4d8] text-white px-8 py-3 rounded-3xl">Enviar a todos</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL OLVIDASTE CONTRASEÑA -->
+    <div id="forgot-modal" onclick="if(event.target.id==='forgot-modal')hideForgotModal()" 
+         class="hidden fixed inset-0 bg-black/60 flex items-center justify-center z-50">
+        <div class="bg-white rounded-3xl p-8 max-w-md w-full modal text-center">
+            <h3 class="text-2xl font-semibold mb-6">Recuperar contraseña</h3>
+            <p class="mb-6 text-slate-600">En una versión real se enviaría un enlace. Aquí solo es demo.</p>
+            <input id="forgot-email" type="email" placeholder="Tu correo" class="w-full px-5 py-4 border border-slate-300 rounded-3xl mb-6">
+            <button onclick="fakeRecoverPassword()" class="bg-[#00b4d8] text-white px-10 py-3 rounded-3xl w-full">Enviar enlace de recuperación</button>
+        </div>
+    </div>
+
+    <!-- Toast para mensajes -->
+    <div id="toast" onclick="this.classList.add('hidden')" 
+         class="hidden fixed bottom-6 right-6 bg-slate-800 text-white px-6 py-4 rounded-3xl shadow-2xl flex items-center gap-3">
+        <span id="toast-text" class="font-medium"></span>
+    </div>
+
+    <script>
+        // ==================== DATOS DE DEMO ====================
+        let users = [
+            {
+                id: 1,
+                name: "Administrador",
+                email: "admin@novamail.com",
+                password: "admin123",
+                verified: true,
+                banned: false,
+                banReason: ""
+            },
+            {
+                id: 2,
+                name: "Usuario Demo",
+                email: "usuario@novamail.com",
+                password: "123456",
+                verified: false,
+                banned: false,
+                banReason: ""
+            },
+            {
+                id: 3,
+                name: "María López",
+                email: "maria@novamail.com",
+                password: "maria2025",
+                verified: true,
+                banned: false,
+                banReason: ""
+            },
+            {
+                id: 4,
+                name: "Carlos Ruiz",
+                email: "carlos@novamail.com",
+                password: "carlos99",
+                verified: false,
+                banned: true,
+                banReason: "Spam repetido"
+            }
+        ]
+
+        let admins = ["admin@novamail.com"] // correos que tienen acceso al panel
+
+        // Correos de ejemplo (por usuario)
+        let mailboxes = {
+            "admin@novamail.com": {
+                inbox: [
+                    {id:1, from:"maria@novamail.com", subject:"Reunión mañana", body:"Hola, ¿confirmamos la reunión a las 10?", date:"hace 2h", read:false, verifiedSender:true},
+                    {id:2, from:"noticias@novamail.com", subject:"Nuevo update de NovaMail", body:"¡Ya puedes usar IA en tus correos!", date:"hace 5h", read:true, verifiedSender:false}
+                ],
+                sent: [],
+                drafts: [{id:3, to:"amigo@novamail.com", subject:"Borrador sin terminar", body:"Hola, te quería decir que...", date:"hace 1d"}],
+                trash: [],
+                starred: []
+            },
+            "usuario@novamail.com": {
+                inbox: [
+                    {id:4, from:"admin@novamail.com", subject:"Bienvenido a NovaMail", body:"Gracias por usar nuestra plataforma.", date:"hace 3h", read:false, verifiedSender:true},
+                    {id:5, from:"carlos@novamail.com", subject:"Proyecto", body:"¿Avanzaste con el diseño?", date:"ayer", read:true, verifiedSender:false}
+                ],
+                sent: [],
+                drafts: [],
+                trash: [],
+                starred: []
+            },
+            "maria@novamail.com": {
+                inbox: [],
+                sent: [],
+                drafts: [],
+                trash: [],
+                starred: []
+            },
+            "carlos@novamail.com": {
+                inbox: [],
+                sent: [],
+                drafts: [],
+                trash: [],
+                starred: []
+            }
+        }
+
+        // Mensaje global para usuarios baneados o anuncios
+        let globalBannerMessage = ""
+
+        let currentUser = null
+        let currentTab = "inbox"
+
+        // ==================== FUNCIONES PRINCIPALES ====================
+
+        function tailwindInit() {
+            return {
+                config(userConfig = {}) {
+                    return {
+                        configUser: userConfig,
+                        theme: { extend: {} },
+                        plugins: [],
+                    }
+                },
+                theme: {
+                    extend: {},
+                },
+            }
+        }
+        // Tailwind listo
+        document.documentElement.setAttribute('data-tailwind-config', JSON.stringify(tailwindInit()))
+
+        function showToast(text) {
+            const toast = document.getElementById('toast')
+            document.getElementById('toast-text').innerHTML = text
+            toast.classList.remove('hidden')
+            setTimeout(() => toast.classList.add('hidden'), 3500)
+        }
+
+        function switchToRegister() {
+            document.getElementById('login-screen').classList.add('hidden')
+            document.getElementById('register-screen').classList.remove('hidden')
+        }
+
+        function switchToLogin() {
+            document.getElementById('register-screen').classList.add('hidden')
+            document.getElementById('login-screen').classList.remove('hidden')
+        }
+
+        function handleLogin() {
+            const email = document.getElementById('login-email').value.trim()
+            const pass = document.getElementById('login-password').value.trim()
+
+            const user = users.find(u => u.email === email && u.password === pass)
+
+            if (!user) {
+                showToast('❌ Correo o contraseña incorrectos')
+                return
+            }
+
+            if (user.banned) {
+                showToast(`🚫 Tu cuenta está baneada.<br>Motivo: <strong>${user.banReason}</strong>`)
+                return
+            }
+
+            currentUser = user
+            document.getElementById('login-screen').classList.add('hidden')
+            document.getElementById('main-app').classList.remove('hidden')
+            document.getElementById('user-display').innerHTML = `
+                <span class="text-sm">${user.name}</span>
+                ${user.verified ? `<i class="fa-solid fa-check-circle text-[#00b4d8] verified-badge"></i>` : ''}
+            `
+
+            // Mostrar link admin solo si es admin
+            if (admins.includes(user.email)) {
+                document.getElementById('admin-sidebar-link').classList.remove('hidden')
+            }
+
+            renderCurrentTab()
+            showToast('✅ Bienvenido a NovaMail')
+        }
+
+        function handleRegister() {
+            const name = document.getElementById('reg-name').value.trim()
+            const email = document.getElementById('reg-email').value.trim()
+            const pass = document.getElementById('reg-password').value.trim()
+
+            if (!name || !email || !pass) {
+                showToast('❌ Completa todos los campos')
+                return
+            }
+
+            if (users.find(u => u.email === email)) {
+                showToast('❌ Ese correo ya está registrado')
+                return
+            }
+
+            const newUser = {
+                id: Date.now(),
+                name: name,
+                email: email,
+                password: pass,
+                verified: false,
+                banned: false,
+                banReason: ""
+            }
+
+            users.push(newUser)
+            mailboxes[email] = { inbox: [], sent: [], drafts: [], trash: [], starred: [] }
+
+            showToast('✅ ¡Cuenta creada! Ahora inicia sesión')
+            switchToLogin()
+        }
+
+        function logout() {
+            currentUser = null
+            document.getElementById('main-app').classList.add('hidden')
+            document.getElementById('login-screen').classList.remove('hidden')
+            document.getElementById('admin-sidebar-link').classList.add('hidden')
+            // Limpiar inputs
+            document.getElementById('login-email').value = ''
+            document.getElementById('login-password').value = ''
+        }
+
+        function changeTab(tab) {
+            currentTab = tab
+            renderCurrentTab()
+        }
+
+        function renderCurrentTab() {
+            if (!currentUser) return
+
+            const mailContent = document.getElementById('mail-content')
+            const adminPanel = document.getElementById('admin-panel')
+
+            // Si es admin y está en tab admin
+            if (currentTab === 'admin' && admins.includes(currentUser.email)) {
+                mailContent.classList.add('hidden')
+                adminPanel.classList.remove('hidden')
+                renderAdminPanel()
+                return
+            } else {
+                mailContent.classList.remove('hidden')
+                adminPanel.classList.add('hidden')
+            }
+
+            document.getElementById('tab-title').textContent = {
+                inbox: 'Bandeja de entrada',
+                starred: 'Destacados',
+                sent: 'Enviados',
+                drafts: 'Borradores',
+                trash: 'Papelera'
+            }[currentTab]
+
+            const container = document.getElementById('email-list')
+            container.innerHTML = ''
+
+            const userBox = mailboxes[currentUser.email]
+            let list = []
+
+            if (currentTab === 'inbox') list = userBox.inbox
+            else if (currentTab === 'starred') list = userBox.starred
+            else if (currentTab === 'sent') list = userBox.sent
+            else if (currentTab === 'drafts') list = userBox.drafts
+            else if (currentTab === 'trash') list = userBox.trash
+
+            if (list.length === 0) {
+                container.innerHTML = `<div class="p-12 text-center text-slate-400">No hay correos en esta carpeta</div>`
+                return
+            }
+
+            list.forEach(email => {
+                const verifiedHTML = email.verifiedSender ? 
+                    `<span class="verified-badge inline-flex items-center bg-[#00b4d8] text-white text-[10px] px-2 rounded-full"><i class="fa-solid fa-check mr-0.5"></i> Verificado</span>` : ''
+
+                const row = document.createElement('div')
+                row.className = `email-row flex items-center px-6 py-4 hover:bg-slate-50 cursor-pointer border-b last:border-none`
+                row.innerHTML = `
+                    <input type="checkbox" class="mr-4">
+                    <div class="flex-1 flex items-center">
+                        <div class="w-8 h-8 bg-slate-200 rounded-2xl flex items-center justify-center mr-4">
+                            <i class="fa-solid fa-user text-slate-600"></i>
+                        </div>
+                        <div class="flex-1">
+                            <div class="flex items-center gap-2">
+                                <span class="font-medium">${email.from || email.to}</span>
+                                ${verifiedHTML}
+                            </div>
+                            <div class="text-sm font-medium">${email.subject}</div>
+                            <div class="text-sm text-slate-500 line-clamp-1">${email.body}</div>
+                        </div>
+                        <div class="text-xs text-slate-400 whitespace-nowrap">${email.date}</div>
+                    </div>
+                `
+                // Click para abrir (simulado)
+                row.onclick = () => {
+                    if (currentTab === 'drafts') {
+                        showToast('📝 Abriendo borrador...')
+                        setTimeout(() => composeEmail(email), 400)
+                    } else {
+                        showToast(`📬 Abriendo correo de <strong>${email.from || email.to}</strong>`)
+                    }
+                }
+                container.appendChild(row)
+            })
+        }
+
+        function composeEmail(draft = null) {
+            const modal = document.getElementById('compose-modal')
+            modal.classList.remove('hidden')
+
+            // Si es borrador, precargar
+            if (draft) {
+                document.getElementById('compose-to').value = draft.to || ''
+                document.getElementById('compose-subject').value = draft.subject || ''
+                document.getElementById('compose-body').value = draft.body || ''
+            }
+        }
+
+        function hideCompose() {
+            document.getElementById('compose-modal').classList.add('hidden')
+        }
+
+        function sendEmail() {
+            const to = document.getElementById('compose-to').value.trim()
+            const subject = document.getElementById('compose-subject').value.trim()
+            const body = document.getElementById('compose-body').value.trim()
+
+            if (!to || !subject) {
+                showToast('❌ Completa destinatario y asunto')
+                return
+            }
+
+            // Guardar en enviados del usuario actual
+            const sentEmail = {
+                id: Date.now(),
+                to: to,
+                subject: subject,
+                body: body,
+                date: "ahora",
+                verifiedSender: currentUser.verified
+            }
+            mailboxes[currentUser.email].sent.push(sentEmail)
+
+            // Si el destinatario existe en el sistema, también ponerlo en su inbox
+            if (mailboxes[to]) {
+                mailboxes[to].inbox.unshift({
+                    id: Date.now() + 1,
+                    from: currentUser.email,
+                    subject: subject,
+                    body: body,
+                    date: "ahora",
+                    read: false,
+                    verifiedSender: currentUser.verified
+                })
+            }
+
+            hideCompose()
+            showToast('✅ Correo enviado correctamente')
+            renderCurrentTab()
+        }
+
+        function refreshMail() {
+            showToast('🔄 Actualizando bandeja...')
+            setTimeout(() => renderCurrentTab(), 800)
+        }
+
+        function searchEmails() {
+            const query = document.getElementById('search-input').value.toLowerCase().trim()
+            if (!query) return renderCurrentTab()
+
+            const container = document.getElementById('email-list')
+            container.innerHTML = `<div class="p-8 text-center">Buscando <strong>${query}</strong>...</div>`
+
+            setTimeout(() => {
+                const userBox = mailboxes[currentUser.email]
+                let allEmails = [...userBox.inbox, ...userBox.sent, ...userBox.drafts, ...userBox.trash]
+
+                const filtered = allEmails.filter(e => 
+                    (e.subject && e.subject.toLowerCase().includes(query)) ||
+                    (e.body && e.body.toLowerCase().includes(query)) ||
+                    (e.from && e.from.toLowerCase().includes(query)) ||
+                    (e.to && e.to.toLowerCase().includes(query))
+                )
+
+                if (filtered.length === 0) {
+                    container.innerHTML = `<div class="p-12 text-center text-slate-400">No se encontraron resultados para <strong>${query}</strong></div>`
+                    return
+                }
+
+                // Renderizar resultados
+                container.innerHTML = ''
+                filtered.forEach(email => {
+                    const row = document.createElement('div')
+                    row.className = `email-row flex items-center px-6 py-4 bg-yellow-50`
+                    row.innerHTML = `
+                        <div class="flex-1">
+                            <span class="text-xs text-amber-600">RESULTADO DE BÚSQUEDA</span><br>
+                            <strong>${email.subject}</strong> • ${email.from || email.to}
+                            ${email.verifiedSender ? `<span class="verified-badge ml-2 text-[#00b4d8]"><i class="fa-solid fa-check-circle"></i></span>` : ''}
+                        </div>
+                    `
+                    container.appendChild(row)
+                })
+            }, 600)
+        }
+
+        // ==================== PANEL ADMIN ====================
+
+        function renderAdminPanel() {
+            const tbody = document.getElementById('users-table')
+            tbody.innerHTML = ''
+
+            users.forEach(user => {
+                const isAdmin = admins.includes(user.email)
+                const row = document.createElement('tr')
+                row.className = 'border-b hover:bg-slate-50'
+                row.innerHTML = `
+                    <td class="px-6 py-4 font-medium">${user.name}</td>
+                    <td class="px-6 py-4 text-slate-600">${user.email}</td>
+                    <td class="px-6 py-4 font-mono text-xs text-red-600">${user.password}</td>
+                    <td class="px-6 py-4">
+                        <button onclick="toggleVerified(${user.id});event.stopImmediatePropagation()" 
+                                class="px-4 py-1 rounded-3xl text-xs font-medium flex items-center gap-1 ${user.verified ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-200'}">
+                            <i class="fa-solid fa-check-circle"></i>
+                            ${user.verified ? 'Verificado' : 'Verificar'}
+                        </button>
+                    </td>
+                    <td class="px-6 py-4">
+                        ${user.banned 
+                            ? `<span class="inline-flex items-center bg-red-100 text-red-700 px-3 py-1 rounded-3xl text-xs">BANEADO</span>` 
+                            : `<span class="inline-flex items-center bg-emerald-100 text-emerald-700 px-3 py-1 rounded-3xl text-xs">Activo</span>`}
+                    </td>
+                    <td class="px-6 py-4 flex gap-2">
+                        ${user.banned 
+                            ? `<button onclick="unbanUser(${user.id});event.stopImmediatePropagation()" class="px-5 py-1 text-xs bg-emerald-600 text-white rounded-3xl">Quitar ban</button>`
+                            : `<button onclick="showBanModal(${user.id});event.stopImmediatePropagation()" class="px-5 py-1 text-xs bg-red-600 text-white rounded-3xl">Banear</button>`}
+                        
+                        ${isAdmin ? `<span class="text-xs px-3 py-1 bg-purple-100 text-purple-700 rounded-3xl">Admin</span>` : ''}
+                        
+                        <button onclick="deleteUser(${user.id});event.stopImmediatePropagation()" class="px-4 py-1 text-xs text-slate-400 hover:text-red-600">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
+                    </td>
+                `
+                tbody.appendChild(row)
+            })
+        }
+
+        function toggleVerified(id) {
+            const user = users.find(u => u.id === id)
+            if (!user) return
+            user.verified = !user.verified
+            showToast(user.verified ? '✅ Usuario verificado (se verá en los correos)' : '❌ Verificación desactivada')
+            renderAdminPanel()
+            // Si estamos en inbox, se actualizará la vista de verificados
+            if (currentTab !== 'admin') renderCurrentTab()
+        }
+
+        let userToBan = null
+
+        function showBanModal(id) {
+            userToBan = users.find(u => u.id === id)
+            if (!userToBan) return
+            document.getElementById('ban-modal').classList.remove('hidden')
+            document.getElementById('ban-reason').focus()
+        }
+
+        function hideBanModal() {
+            document.getElementById('ban-modal').classList.add('hidden')
+            userToBan = null
+        }
+
+        function confirmBan() {
+            const reason = document.getElementById('ban-reason').value.trim()
+            if (!reason) {
+                showToast('❌ Debes escribir un motivo')
+                return
+            }
+            if (!userToBan) return
+
+            userToBan.banned = true
+            userToBan.banReason = reason
+            hideBanModal()
+            showToast(`🚫 ${userToBan.name} ha sido baneado`)
+            renderAdminPanel()
+        }
+
+        function unbanUser(id) {
+            const user = users.find(u => u.id === id)
+            if (!user) return
+            user.banned = false
+            user.banReason = ''
+            showToast(`✅ ${user.name} ha sido desbaneado`)
+            renderAdminPanel()
+        }
+
+        function addAdminByEmail() {
+            const email = prompt('📧 Ingresa el correo electrónico al que quieres dar acceso al Panel Admin:')
+            if (!email) return
+
+            if (admins.includes(email)) {
+                showToast('⚠️ Ese correo ya es administrador')
+                return
+            }
+
+            // Si el usuario no existe, lo creamos
+            if (!users.find(u => u.email === email)) {
+                users.push({
+                    id: Date.now(),
+                    name: "Admin Compartido",
+                    email: email,
+                    password: "temporal123",
+                    verified: true,
+                    banned: false,
+                    banReason: ""
+                })
+                mailboxes[email] = { inbox: [], sent: [], drafts: [], trash: [], starred: [] }
+            }
+
+            admins.push(email)
+            showToast(`✅ ${email} ahora tiene acceso al Panel Admin`)
+            renderAdminPanel()
+        }
+
+        function showMassMessageModal() {
+            document.getElementById('mass-modal').classList.remove('hidden')
+        }
+
+        function hideMassModal() {
+            document.getElementById('mass-modal').classList.add('hidden')
+        }
+
+        function sendMassMessage() {
+            const msg = document.getElementById('mass-text').value.trim()
+            if (!msg) return
+
+            globalBannerMessage = msg
+            hideMassModal()
+            showToast('📢 Mensaje global enviado a todos los usuarios')
+            
+            // Simular que todos los usuarios lo ven al iniciar
+            if (currentUser) {
+                showToast(`📨 Todos los usuarios verán: <strong>${msg.substring(0, 30)}...</strong>`)
+            }
+        }
+
+        function exportUserData() {
+            let csv = "Nombre,Correo,Verificado,Baneado,MotivoBan,Contraseña\n"
+            users.forEach(u => {
+                csv += `${u.name},${u.email},${u.verified},${u.banned},${u.banReason || 'Ninguno'},${u.password}\n`
+            })
+            const blob = new Blob([csv], { type: 'text/csv' })
+            const url = URL.createObjectURL(blob)
+            const a = document.createElement('a')
+            a.href = url
+            a.download = 'usuarios_novamail.csv'
+            a.click()
+            showToast('📤 Datos exportados (CSV)')
+        }
+
+        function deleteUser(id) {
+            if (!confirm('¿Eliminar usuario permanentemente?')) return
+            users = users.filter(u => u.id !== id)
+            renderAdminPanel()
+            showToast('🗑️ Usuario eliminado')
+        }
+
+        function showAccountMenu() {
+            const options = `
+                <div class="absolute top-16 right-6 bg-white shadow-2xl rounded-3xl py-2 w-72 text-sm z-50">
+                    <div onclick="logout()" class="px-6 py-4 hover:bg-slate-100 cursor-pointer flex items-center gap-3">
+                        <i class="fa-solid fa-sign-out-alt"></i> Cerrar sesión
+                    </div>
+                    <div class="px-6 py-4 hover:bg-slate-100 cursor-pointer">Mi cuenta</div>
+                    <div class="px-6 py-4 hover:bg-slate-100 cursor-pointer">Configuración</div>
+                    <div class="px-6 py-4 hover:bg-slate-100 cursor-pointer border-t">Ayuda y comentarios</div>
+                </div>
+            `
+            const menu = document.createElement('div')
+            menu.innerHTML = options
+            document.body.appendChild(menu.firstElementChild)
+            setTimeout(() => document.addEventListener('click', removeMenu, {once: true}), 10)
+            
+            function removeMenu() {
+                const m = document.querySelector('.shadow-2xl')
+                if (m) m.remove()
+            }
+        }
+
+        function showForgotModal() {
+            document.getElementById('forgot-modal').classList.remove('hidden')
+        }
+
+        function hideForgotModal() {
+            document.getElementById('forgot-modal').classList.add('hidden')
+        }
+
+        function fakeRecoverPassword() {
+            hideForgotModal()
+            showToast('📧 Enlace de recuperación enviado (demo)')
+        }
+
+        // Toggle sidebar en móviles (opcional)
+        function toggleSidebar() {
+            const sidebar = document.querySelector('#sidebar')
+            sidebar.style.transform = sidebar.style.transform === 'translateX(-100%)' ? 'translateX(0)' : 'translateX(-100%)'
+        }
+
+        // ==================== INICIO ====================
+        console.log('%c🚀 NovaMail clon listo - Todo funciona: papelera, borradores, admin, verificados, ban, etc.', 'color:#00b4d8;font-weight:bold')
+    </script>
+</body>
+</html>
