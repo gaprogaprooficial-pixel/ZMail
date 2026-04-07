@@ -1,941 +1,1508 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NovaMail - Tu correo inteligente</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
-        
-        :root {
-            --nova-blue: #00b4d8;
-        }
-        
-        * {
-            font-family: 'Roboto', sans-serif;
-        }
-        
-        .gmail-header {
-            background: linear-gradient(90deg, #00b4d8, #0099bb);
-        }
-        
-        .sidebar-link {
-            transition: all 0.2s;
-        }
-        
-        .sidebar-link:hover {
-            background-color: #f1f5f9;
-        }
-        
-        .email-row {
-            transition: all 0.2s;
-        }
-        
-        .email-row:hover {
-            background-color: #f8fafc;
-        }
-        
-        .verified-badge {
-            animation: pulse 2s infinite;
-        }
-        
-        @keyframes pulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.1); }
-        }
-        
-        .modal {
-            animation: modalPop 0.3s ease;
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ZMail — Tu correo inteligente</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --z-blue: #1a6cf6;
+  --z-blue-dark: #1250c4;
+  --z-blue-light: #e8f0fe;
+  --z-red: #e53935;
+  --z-green: #1e8e3e;
+  --z-yellow: #f9ab00;
+  --z-purple: #7c4dff;
+  --bg: #f0f4f9;
+  --surface: #ffffff;
+  --surface2: #f8fafd;
+  --border: #dde3ea;
+  --text: #1a1c1e;
+  --text2: #444746;
+  --text3: #747775;
+  --sidebar-w: 256px;
+  --topbar-h: 64px;
+  --shadow: 0 1px 4px rgba(0,0,0,.08), 0 2px 12px rgba(0,0,0,.04);
+  --shadow-lg: 0 4px 24px rgba(0,0,0,.12), 0 1px 6px rgba(0,0,0,.06);
+  --radius: 12px;
+  --radius-sm: 8px;
+  --radius-full: 100px;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; font-family: 'DM Sans', sans-serif; font-size: 14px; color: var(--text); background: var(--bg); }
+a { color: inherit; text-decoration: none; }
+button { font-family: inherit; cursor: pointer; border: none; outline: none; }
+input, textarea, select { font-family: inherit; outline: none; border: none; }
+.hidden { display: none !important; }
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #c8cacd; border-radius: 3px; }
+
+/* ───── AUTH ───── */
+#auth-screen {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #e8f0fe 0%, #fff 50%, #fce8e6 100%);
+  padding: 24px;
+}
+.auth-logo-wrap { display: flex; align-items: center; gap: 10px; margin-bottom: 32px; }
+.auth-logo-icon { width: 44px; height: 44px; }
+.auth-logo-name { font-size: 30px; font-weight: 300; letter-spacing: -1px; color: #3c4043; }
+.auth-logo-name b { color: var(--z-blue); font-weight: 600; }
+.auth-card {
+  background: var(--surface);
+  border-radius: 20px;
+  padding: 48px 44px 40px;
+  width: 100%;
+  max-width: 460px;
+  box-shadow: var(--shadow-lg);
+}
+.auth-card h2 { font-size: 26px; font-weight: 400; margin-bottom: 8px; }
+.auth-subtitle { color: var(--text3); margin-bottom: 28px; font-size: 15px; }
+.auth-msg { padding: 11px 14px; border-radius: var(--radius-sm); font-size: 13px; margin-bottom: 14px; }
+.auth-msg.error { background: #fce8e6; color: #c62828; }
+.auth-msg.success { background: #e6f4ea; color: #1b5e20; }
+.field-group { margin-bottom: 16px; }
+.field-group label { display: block; font-size: 12px; font-weight: 500; color: var(--text2); margin-bottom: 6px; letter-spacing: .4px; text-transform: uppercase; }
+.field-group input {
+  width: 100%;
+  padding: 13px 16px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: 15px;
+  transition: border-color .2s, box-shadow .2s;
+  background: #fafafa;
+}
+.field-group input:focus { border-color: var(--z-blue); box-shadow: 0 0 0 3px rgba(26,108,246,.12); background: #fff; }
+.btn-primary {
+  width: 100%;
+  background: var(--z-blue);
+  color: #fff;
+  border-radius: var(--radius-sm);
+  padding: 13px;
+  font-size: 15px;
+  font-weight: 500;
+  transition: background .2s, transform .1s;
+  margin-top: 4px;
+}
+.btn-primary:hover { background: var(--z-blue-dark); }
+.btn-primary:active { transform: scale(.99); }
+.auth-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 20px; }
+.link { color: var(--z-blue); font-size: 14px; cursor: pointer; }
+.link:hover { text-decoration: underline; }
+
+/* ───── BANNED / SYSDOWN ───── */
+.overlay-screen {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: var(--bg);
+}
+.overlay-card {
+  background: var(--surface);
+  border-radius: 20px;
+  padding: 48px 44px;
+  max-width: 500px;
+  width: 100%;
+  text-align: center;
+  box-shadow: var(--shadow-lg);
+}
+.overlay-icon { font-size: 56px; margin-bottom: 20px; }
+.overlay-card h2 { font-size: 24px; font-weight: 500; margin-bottom: 12px; }
+.overlay-card p { color: var(--text2); line-height: 1.6; }
+.ban-reason-box {
+  background: #fce8e6;
+  border-left: 3px solid var(--z-red);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  padding: 12px 16px;
+  margin: 16px 0;
+  text-align: left;
+  font-style: italic;
+  color: #b71c1c;
+  font-size: 14px;
+}
+
+/* ───── SYSDOWN BANNER ───── */
+.sysdown-banner {
+  background: #b71c1c;
+  color: #fff;
+  text-align: center;
+  padding: 9px 16px;
+  font-size: 13px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 9999;
+}
+
+/* ───── MAIN APP ───── */
+#app-screen { display: flex; flex-direction: column; height: 100vh; }
+.has-sysdown { padding-top: 38px; }
+
+.topbar {
+  height: var(--topbar-h);
+  display: flex;
+  align-items: center;
+  padding: 0 12px;
+  gap: 8px;
+  background: var(--bg);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  flex-shrink: 0;
+}
+.topbar-logo {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 230px;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: var(--radius-sm);
+  transition: background .15s;
+}
+.topbar-logo:hover { background: rgba(0,0,0,.04); }
+.topbar-logo svg { width: 30px; height: 30px; }
+.topbar-logo-text { font-size: 22px; font-weight: 300; letter-spacing: -.5px; color: var(--text3); }
+.topbar-logo-text b { color: var(--z-blue); font-weight: 600; }
+.search-wrap {
+  flex: 1;
+  max-width: 740px;
+  background: #e9eef6;
+  border-radius: var(--radius-full);
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  gap: 10px;
+  height: 46px;
+  transition: background .2s, box-shadow .2s;
+}
+.search-wrap:focus-within { background: var(--surface); box-shadow: 0 2px 8px rgba(0,0,0,.12); }
+.search-wrap input { flex: 1; background: none; font-size: 15px; color: var(--text); }
+.search-icon { color: var(--text3); font-size: 18px; }
+.topbar-actions { display: flex; align-items: center; gap: 8px; margin-left: auto; }
+.live-indicator { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text3); }
+.live-dot { width: 7px; height: 7px; border-radius: 50%; background: #34a853; animation: pulse 1.8s infinite; }
+@keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.5;transform:scale(.85)} }
+.avatar-wrap { position: relative; }
+.avatar-btn {
+  width: 38px; height: 38px;
+  border-radius: 50%;
+  color: #fff;
+  font-size: 15px;
+  font-weight: 600;
+  display: flex; align-items: center; justify-content: center;
+  overflow: hidden;
+  cursor: pointer;
+  transition: opacity .15s;
+}
+.avatar-btn:hover { opacity: .88; }
+.avatar-btn img { width: 100%; height: 100%; object-fit: cover; }
+.topbar-icon-btn {
+  width: 40px; height: 40px;
+  border-radius: 50%;
+  background: none;
+  color: var(--text2);
+  font-size: 19px;
+  display: flex; align-items: center; justify-content: center;
+  transition: background .15s;
+}
+.topbar-icon-btn:hover { background: rgba(0,0,0,.06); }
+
+/* ───── PROFILE DROPDOWN ───── */
+.profile-dd {
+  position: absolute;
+  top: 48px; right: 0;
+  background: var(--surface);
+  border-radius: 16px;
+  box-shadow: 0 6px 32px rgba(0,0,0,.16);
+  min-width: 300px;
+  z-index: 500;
+  overflow: hidden;
+}
+.profile-dd-header { padding: 24px; text-align: center; border-bottom: 1px solid var(--border); }
+.profile-pic-wrap {
+  width: 68px; height: 68px;
+  border-radius: 50%;
+  margin: 0 auto 12px;
+  position: relative;
+  cursor: pointer;
+  overflow: hidden;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 24px; font-weight: 600; color: #fff;
+}
+.profile-pic-wrap img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
+.pic-overlay {
+  position: absolute; inset: 0;
+  background: rgba(0,0,0,.45);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  color: #fff;
+  border-radius: 50%;
+  text-align: center;
+  line-height: 1.3;
+}
+.profile-pic-wrap:hover .pic-overlay { display: flex; }
+.profile-dd-name { font-size: 16px; font-weight: 500; }
+.profile-dd-email { font-size: 13px; color: var(--text3); margin-top: 2px; }
+.verified-badge { display: inline-flex; align-items: center; gap: 4px; background: var(--z-blue-light); color: var(--z-blue); padding: 3px 10px; border-radius: var(--radius-full); font-size: 12px; font-weight: 500; margin-top: 8px; }
+.dd-item { padding: 11px 18px; cursor: pointer; display: flex; align-items: center; gap: 10px; font-size: 14px; transition: background .12s; }
+.dd-item:hover { background: var(--surface2); }
+input[type=file] { display: none; }
+
+/* ───── BODY ───── */
+.body-wrap { display: flex; flex: 1; overflow: hidden; }
+
+/* ───── SIDEBAR ───── */
+.sidebar {
+  width: var(--sidebar-w);
+  padding: 8px 12px;
+  flex-shrink: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.compose-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #c2e7ff;
+  border-radius: var(--radius-full);
+  padding: 16px 24px;
+  font-size: 14px;
+  font-weight: 500;
+  margin-bottom: 6px;
+  width: 100%;
+  transition: background .15s, box-shadow .15s;
+}
+.compose-btn:hover { background: #a8d8f8; box-shadow: var(--shadow); }
+.compose-btn svg { width: 20px; height: 20px; }
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 6px 12px;
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  font-size: 14px;
+  color: var(--text2);
+  transition: background .12s;
+  height: 36px;
+  white-space: nowrap;
+  overflow: hidden;
+}
+.nav-item:hover { background: rgba(0,0,0,.06); }
+.nav-item.active { background: #d3e3fd; color: var(--text); font-weight: 500; }
+.nav-item .nav-icon { font-size: 17px; width: 20px; text-align: center; flex-shrink: 0; }
+.nav-count { margin-left: auto; font-size: 12px; font-weight: 500; color: var(--text2); }
+.nav-sep { height: 1px; background: var(--border); margin: 8px 4px; }
+
+/* ───── EMAIL LIST ───── */
+.email-list-pane { flex: 1; overflow-y: auto; display: flex; flex-direction: column; min-width: 0; }
+.list-header {
+  display: flex;
+  align-items: center;
+  padding: 12px 20px;
+  border-bottom: 1px solid var(--border);
+  gap: 10px;
+  position: sticky;
+  top: 0;
+  background: var(--bg);
+  z-index: 10;
+}
+.list-title { font-size: 16px; font-weight: 500; }
+.list-count { font-size: 13px; color: var(--text3); }
+.email-row {
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  height: 56px;
+  border-bottom: 1px solid #f1f3f4;
+  cursor: pointer;
+  transition: background .1s;
+  gap: 10px;
+  min-width: 0;
+}
+.email-row:hover { background: #f0f3f8; }
+.email-row.selected { background: #d3e3fd; }
+.email-row.unread { background: var(--surface); font-weight: 600; }
+.email-row.unread:hover { background: #f0f3f8; }
+.email-avatar-sm {
+  width: 38px; height: 38px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; font-weight: 600; color: #fff;
+  overflow: hidden;
+}
+.email-avatar-sm img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
+.email-info { flex: 1; min-width: 0; overflow: hidden; }
+.email-sender-row { display: flex; align-items: center; gap: 5px; }
+.email-sender-name { font-size: 13.5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 160px; }
+.email-subject-line { font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--text2); }
+.email-preview-text { font-weight: 400; color: var(--text3); }
+.email-date-col { font-size: 12px; color: var(--text3); flex-shrink: 0; min-width: 50px; text-align: right; }
+.star-icon { font-size: 16px; cursor: pointer; flex-shrink: 0; padding: 4px; }
+.imp-icon { font-size: 14px; }
+.verify-row-badge { font-size: 11px; color: var(--z-blue); font-weight: 600; }
+.empty-state { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--text3); padding: 60px 20px; }
+.empty-icon { font-size: 56px; margin-bottom: 16px; }
+.empty-text { font-size: 16px; }
+
+/* ───── EMAIL VIEWER ───── */
+.email-viewer { flex: 1; overflow-y: auto; padding: 24px 36px; background: var(--bg); }
+.viewer-toolbar { display: flex; align-items: center; gap: 6px; margin-bottom: 20px; }
+.tool-btn {
+  width: 38px; height: 38px;
+  border-radius: 50%;
+  background: none;
+  font-size: 18px;
+  color: var(--text2);
+  display: flex; align-items: center; justify-content: center;
+  transition: background .12s;
+}
+.tool-btn:hover { background: rgba(0,0,0,.07); }
+.viewer-subject { font-size: 24px; font-weight: 400; margin-bottom: 16px; line-height: 1.3; }
+.viewer-meta { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 20px; }
+.viewer-avatar {
+  width: 42px; height: 42px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px; font-weight: 600; color: #fff;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+.viewer-avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
+.viewer-from-name { font-size: 14px; font-weight: 500; display: flex; align-items: center; gap: 6px; }
+.viewer-from-detail { font-size: 12px; color: var(--text3); margin-top: 2px; }
+.viewer-body { background: var(--surface); border-radius: var(--radius); padding: 28px; line-height: 1.7; font-size: 14px; box-shadow: var(--shadow); }
+.reply-section { margin-top: 16px; display: flex; gap: 8px; }
+.reply-btn-pill {
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-full);
+  padding: 8px 20px;
+  font-size: 14px;
+  font-weight: 500;
+  background: var(--surface);
+  display: flex; align-items: center; gap: 6px;
+  transition: background .12s, border-color .12s;
+}
+.reply-btn-pill:hover { background: var(--surface2); border-color: #b0b7bf; }
+
+/* ───── COMPOSE ───── */
+.compose-modal {
+  position: fixed;
+  bottom: 0;
+  right: 20px;
+  width: 580px;
+  background: var(--surface);
+  border-radius: 12px 12px 0 0;
+  box-shadow: 0 -2px 24px rgba(0,0,0,.16), 0 0 0 1px rgba(0,0,0,.06);
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+}
+.compose-header {
+  background: #333;
+  color: #fff;
+  padding: 11px 18px;
+  border-radius: 12px 12px 0 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: move;
+}
+.compose-header-title { font-size: 14px; font-weight: 500; }
+.compose-close { background: none; color: #ccc; font-size: 20px; transition: color .1s; }
+.compose-close:hover { color: #fff; }
+.compose-field { border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 8px; padding: 8px 16px; }
+.compose-label { font-size: 12px; color: var(--text3); width: 40px; flex-shrink: 0; }
+.compose-field input { flex: 1; font-size: 14px; background: none; }
+.compose-body { padding: 12px 16px; }
+.compose-body textarea { width: 100%; border: none; resize: none; font-size: 14px; min-height: 200px; background: none; color: var(--text); }
+.compose-footer { padding: 8px 14px; border-top: 1px solid var(--border); display: flex; align-items: center; gap: 8px; }
+.send-btn { background: var(--z-blue); color: #fff; border-radius: var(--radius-full); padding: 9px 22px; font-size: 14px; font-weight: 500; transition: background .15s; }
+.send-btn:hover { background: var(--z-blue-dark); }
+.compose-icon-btn { width: 36px; height: 36px; border-radius: 50%; background: none; color: var(--text2); font-size: 17px; display: flex; align-items: center; justify-content: center; transition: background .12s; }
+.compose-icon-btn:hover { background: var(--surface2); }
+
+/* ───── TOAST ───── */
+.toast {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #323232;
+  color: #fff;
+  padding: 13px 22px;
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  z-index: 3000;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  box-shadow: var(--shadow-lg);
+  animation: toastIn .25s ease;
+  max-width: 440px;
+}
+@keyframes toastIn { from{opacity:0;transform:translateX(-50%) translateY(12px)} to{opacity:1;transform:translateX(-50%) translateY(0)} }
+
+/* ───── MODAL ───── */
+.modal-overlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,.48);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 2000;
+  animation: fadeIn .18s ease;
+}
+@keyframes fadeIn { from{opacity:0} to{opacity:1} }
+.modal-box {
+  background: var(--surface);
+  border-radius: 20px;
+  padding: 36px 40px;
+  max-width: 460px;
+  width: 90%;
+  box-shadow: var(--shadow-lg);
+  animation: slideUp .22s ease;
+}
+@keyframes slideUp { from{transform:translateY(20px);opacity:0} to{transform:none;opacity:1} }
+.modal-title { font-size: 20px; font-weight: 500; margin-bottom: 6px; }
+.modal-subtitle { font-size: 14px; color: var(--text3); margin-bottom: 20px; }
+.modal-input {
+  width: 100%;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 11px 14px;
+  font-size: 14px;
+  margin-bottom: 12px;
+  transition: border-color .2s;
+}
+.modal-input:focus { border-color: var(--z-blue); }
+.modal-btns { display: flex; gap: 8px; justify-content: flex-end; margin-top: 8px; }
+
+/* ───── ADMIN ───── */
+#admin-screen { display: flex; height: 100vh; overflow: hidden; }
+.adm-sidebar {
+  width: 248px;
+  background: #1a1a2e;
+  color: #c8ccd4;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+.adm-logo { padding: 24px 20px 20px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid #2e2e4a; }
+.adm-logo svg { width: 26px; height: 26px; }
+.adm-logo-text { font-size: 17px; font-weight: 600; color: #a78bfa; }
+.adm-section-label { padding: 16px 20px 6px; font-size: 10px; letter-spacing: 1.2px; text-transform: uppercase; color: #5c6380; }
+.adm-nav {
+  padding: 4px 12px 4px;
+  border-radius: 0 var(--radius-full) var(--radius-full) 0;
+  margin-right: 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 38px;
+  cursor: pointer;
+  font-size: 13.5px;
+  transition: background .12s, color .12s;
+  color: #9ca3b0;
+}
+.adm-nav:hover { background: #2a2a46; color: #e2e5ed; }
+.adm-nav.active { background: #2a2a46; color: #a78bfa; font-weight: 500; }
+.adm-nav-icon { font-size: 15px; width: 20px; text-align: center; flex-shrink: 0; }
+.adm-sep { height: 1px; background: #2e2e4a; margin: 10px 0; }
+.adm-content { flex: 1; overflow-y: auto; background: #f4f6fb; padding: 28px; }
+.adm-topbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+.adm-page-title { font-size: 22px; font-weight: 500; color: var(--text); }
+.adm-status { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--text3); }
+.stat-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 16px; margin-bottom: 24px; }
+.stat-card { background: var(--surface); border-radius: var(--radius); padding: 22px; box-shadow: var(--shadow); }
+.stat-num { font-size: 34px; font-weight: 600; line-height: 1; margin-bottom: 4px; }
+.stat-label { font-size: 12px; color: var(--text3); font-weight: 500; text-transform: uppercase; letter-spacing: .5px; }
+.adm-card { background: var(--surface); border-radius: var(--radius); padding: 22px; box-shadow: var(--shadow); margin-bottom: 16px; }
+.adm-card-title { font-size: 15px; font-weight: 600; margin-bottom: 16px; color: var(--text); }
+.tbl { width: 100%; border-collapse: collapse; }
+.tbl th { text-align: left; padding: 9px 12px; font-size: 11px; color: var(--text3); font-weight: 600; text-transform: uppercase; letter-spacing: .5px; border-bottom: 1.5px solid var(--border); }
+.tbl td { padding: 11px 12px; border-bottom: 1px solid #f1f3f4; font-size: 13px; vertical-align: middle; }
+.tbl tr:hover td { background: #f8fafd; }
+.badge { display: inline-flex; align-items: center; padding: 3px 10px; border-radius: var(--radius-full); font-size: 12px; font-weight: 500; white-space: nowrap; }
+.badge-blue { background: #e8f0fe; color: #1a6cf6; }
+.badge-green { background: #e6f4ea; color: #1e8e3e; }
+.badge-red { background: #fce8e6; color: #c62828; }
+.badge-gray { background: #f1f3f4; color: #5f6368; }
+.badge-orange { background: #fff3e0; color: #e65100; }
+.badge-purple { background: #f3e8fd; color: #7c4dff; }
+.btn-xs { padding: 5px 12px; border-radius: var(--radius-sm); font-size: 12px; font-weight: 500; cursor: pointer; border: 1.5px solid; transition: .15s; white-space: nowrap; }
+.btn-danger { background: var(--z-red); color: #fff; border-color: var(--z-red); }
+.btn-danger:hover { background: #c62828; border-color: #c62828; }
+.btn-success { background: var(--z-green); color: #fff; border-color: var(--z-green); }
+.btn-success:hover { background: #155d2d; border-color: #155d2d; }
+.btn-warn { background: var(--z-yellow); color: #202124; border-color: var(--z-yellow); }
+.btn-warn:hover { background: #d49200; border-color: #d49200; }
+.btn-outline-blue { background: #fff; color: var(--z-blue); border-color: var(--z-blue); }
+.btn-outline-blue:hover { background: var(--z-blue-light); }
+.btn-outline-gray { background: #fff; color: var(--text2); border-color: var(--border); }
+.btn-outline-gray:hover { background: var(--surface2); }
+/* Toggle */
+.toggle { position: relative; width: 44px; height: 24px; }
+.toggle input { opacity: 0; width: 0; height: 0; position: absolute; }
+.toggle-track { position: absolute; inset: 0; background: #ccc; border-radius: 24px; cursor: pointer; transition: background .25s; }
+.toggle-track::before { content: ''; position: absolute; width: 18px; height: 18px; left: 3px; top: 3px; background: #fff; border-radius: 50%; transition: transform .25s; box-shadow: 0 1px 3px rgba(0,0,0,.2); }
+.toggle input:checked + .toggle-track { background: var(--z-blue); }
+.toggle input:checked + .toggle-track::before { transform: translateX(20px); }
+/* PW cell */
+.pw-cell { font-family: 'DM Mono', monospace; font-size: 12px; color: var(--text3); cursor: help; max-width: 130px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* PFP request */
+.pfp-req-row { display: flex; align-items: center; gap: 14px; padding: 12px; border: 1px solid var(--border); border-radius: var(--radius-sm); margin-bottom: 10px; }
+.pfp-preview { width: 52px; height: 52px; border-radius: 50%; object-fit: cover; }
+/* Activity feed */
+.activity-row { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid #f1f3f4; }
+.activity-ava { width: 34px; height: 34px; border-radius: 50%; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; color: #fff; }
+.activity-info { flex: 1; min-width: 0; }
+.activity-main { font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.activity-sub { font-size: 12px; color: var(--text3); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.activity-time { font-size: 11px; color: var(--text3); }
+/* Tabs */
+.tabs { display: flex; border-bottom: 1.5px solid var(--border); margin-bottom: 20px; gap: 0; }
+.tab-btn { padding: 9px 20px; font-size: 14px; color: var(--text3); border-bottom: 2px solid transparent; cursor: pointer; transition: color .15s; background: none; margin-bottom: -1.5px; }
+.tab-btn.active { color: var(--z-blue); border-bottom-color: var(--z-blue); font-weight: 500; }
+</style>
 </head>
-<body class="bg-slate-100">
-    <!-- PANTALLA DE LOGIN (exactamente como Gmail) -->
-    <div id="login-screen" class="min-h-screen flex items-center justify-center bg-white">
-        <div class="w-full max-w-md p-8">
-            <!-- Logo NovaMail -->
-            <div class="flex items-center justify-center gap-3 mb-8">
-                <div class="w-12 h-12 bg-[#00b4d8] rounded-2xl flex items-center justify-center shadow-lg">
-                    <i class="fa-solid fa-envelope text-white text-3xl"></i>
-                </div>
-                <div>
-                    <h1 class="text-4xl font-bold text-[#00b4d8] tracking-tighter">NovaMail</h1>
-                    <p class="text-xs text-slate-500 -mt-1">correo del futuro</p>
-                </div>
+<body>
+
+<!-- AUTH -->
+<div id="auth-screen">
+  <div class="auth-logo-wrap">
+    <svg class="auth-logo-icon" viewBox="0 0 44 44" fill="none">
+      <rect width="44" height="44" rx="11" fill="#1a6cf6"/>
+      <path d="M9 13h26v20a2 2 0 01-2 2H11a2 2 0 01-2-2V13z" fill="#fff" opacity=".92"/>
+      <path d="M9 13l13 10 13-10" stroke="#1a6cf6" stroke-width="2.5" fill="none" stroke-linejoin="round"/>
+    </svg>
+    <span class="auth-logo-name">Z<b>Mail</b></span>
+  </div>
+  <div class="auth-card" id="auth-card">
+    <h2 id="auth-title">Iniciar sesión</h2>
+    <p class="auth-subtitle" id="auth-sub">Usa tu cuenta ZMail</p>
+    <div id="auth-msg-box"></div>
+    <div id="auth-form-login">
+      <div class="field-group"><label>Correo electrónico</label><input type="email" id="li-email" placeholder="tucorreo@zmail.com"></div>
+      <div class="field-group"><label>Contraseña</label><input type="password" id="li-pass" placeholder="••••••••"></div>
+      <button class="btn-primary" id="do-login">Iniciar sesión</button>
+      <div class="auth-footer">
+        <span class="link" id="to-register">Crear cuenta</span>
+        <span class="link" style="color:var(--text3);cursor:default">¿Olvidaste tu contraseña?</span>
+      </div>
+    </div>
+    <div id="auth-form-register" class="hidden">
+      <div class="field-group"><label>Nombre completo</label><input type="text" id="rg-name" placeholder="Tu nombre"></div>
+      <div class="field-group"><label>Correo electrónico</label><input type="email" id="rg-email" placeholder="tucorreo@zmail.com"></div>
+      <div class="field-group"><label>Contraseña</label><input type="password" id="rg-pass" placeholder="Mínimo 6 caracteres"></div>
+      <div class="field-group"><label>Confirmar contraseña</label><input type="password" id="rg-pass2" placeholder="Repite la contraseña"></div>
+      <button class="btn-primary" id="do-register">Crear cuenta</button>
+      <div class="auth-footer">
+        <span class="link" id="to-login">Ya tengo cuenta</span>
+      </div>
+    </div>
+  </div>
+  <div style="margin-top:24px;font-size:12px;color:#9aa0a6">© 2025 ZMail Technologies · Privacidad · Términos</div>
+</div>
+
+<!-- BANNED -->
+<div id="banned-screen" class="overlay-screen hidden">
+  <div class="overlay-card">
+    <div class="overlay-icon">🚫</div>
+    <h2 style="color:var(--z-red)">Cuenta suspendida</h2>
+    <p>Tu cuenta ha sido suspendida. Motivo:</p>
+    <div class="ban-reason-box" id="ban-reason-display"></div>
+    <p style="font-size:13px;color:var(--text3);margin-top:12px">¿Crees que es un error? Escribe a <b>soporte@zmail.com</b></p>
+    <button class="btn-primary" style="margin-top:20px" onclick="logout()">Volver al inicio</button>
+  </div>
+</div>
+
+<!-- SYSDOWN (usuarios) -->
+<div id="sysdown-screen" class="overlay-screen hidden">
+  <div class="overlay-card">
+    <div class="overlay-icon">🔧</div>
+    <h2>ZMail vuelve pronto</h2>
+    <p id="sysdown-msg-display" style="margin-top:8px;color:var(--text2)"></p>
+    <button class="btn-primary" style="margin-top:28px;width:auto;padding:12px 32px" onclick="logout()">Volver</button>
+  </div>
+</div>
+
+<!-- SYSDOWN BANNER (admin) -->
+<div id="sysdown-admin-banner" class="sysdown-banner hidden">
+  🔧 Modo mantenimiento ACTIVO — los usuarios normales ven la pantalla de mantenimiento. <b>Tú (admin) no te ves afectado.</b>
+</div>
+
+<!-- MAIN APP -->
+<div id="app-screen" class="hidden">
+  <div class="topbar" id="main-topbar">
+    <div class="topbar-logo" id="logo-home">
+      <svg viewBox="0 0 30 30" fill="none">
+        <rect width="30" height="30" rx="7" fill="#1a6cf6"/>
+        <path d="M5 9h20v14a1.5 1.5 0 01-1.5 1.5H6.5A1.5 1.5 0 015 23V9z" fill="#fff" opacity=".92"/>
+        <path d="M5 9l10 8 10-8" stroke="#1a6cf6" stroke-width="2" fill="none"/>
+      </svg>
+      <span class="topbar-logo-text">Z<b>Mail</b></span>
+    </div>
+    <div class="search-wrap">
+      <span class="search-icon">🔍</span>
+      <input type="text" id="search-input" placeholder="Buscar en el correo...">
+    </div>
+    <div class="topbar-actions">
+      <div class="live-indicator"><span class="live-dot"></span>En vivo</div>
+      <button class="topbar-icon-btn" id="goto-admin-btn" style="display:none" title="Panel Admin">⚙️</button>
+      <div class="avatar-wrap">
+        <div class="avatar-btn" id="avatar-topbar-btn" style="background:#1a6cf6"></div>
+        <div id="profile-dropdown" class="profile-dd hidden">
+          <div class="profile-dd-header">
+            <div class="profile-pic-wrap" id="profile-pic-wrap" style="background:#1a6cf6">
+              <div class="pic-overlay">Cambiar<br>foto</div>
             </div>
-
-            <h2 class="text-2xl font-medium text-center mb-8">Iniciar sesión</h2>
-            
-            <div class="space-y-6">
-                <div>
-                    <input id="login-email" 
-                           type="email" 
-                           placeholder="Correo electrónico"
-                           class="w-full px-4 py-4 border border-slate-300 rounded-3xl focus:outline-none focus:border-[#00b4d8] text-lg">
-                </div>
-                <div>
-                    <input id="login-password" 
-                           type="password" 
-                           placeholder="Contraseña"
-                           class="w-full px-4 py-4 border border-slate-300 rounded-3xl focus:outline-none focus:border-[#00b4d8] text-lg">
-                </div>
-
-                <button onclick="handleLogin()" 
-                        class="w-full bg-[#00b4d8] hover:bg-[#0099bb] text-white py-4 rounded-3xl text-lg font-medium transition-all">
-                    Iniciar sesión
-                </button>
-
-                <div class="flex justify-between text-sm">
-                    <a href="#" onclick="showForgotModal()" class="text-[#00b4d8] hover:underline">¿Olvidaste tu contraseña?</a>
-                    <a href="#" onclick="switchToRegister()" class="text-[#00b4d8] hover:underline">Crear cuenta</a>
-                </div>
-
-                <!-- Demo credentials -->
-                <div class="bg-slate-50 border border-slate-200 rounded-2xl p-4 text-xs text-slate-600">
-                    <strong>Cuenta ADMIN (para probar panel):</strong><br>
-                    ejemplo usuarios_novamail<br><br>
-                    <strong>Usuario normal:</strong><br>
-                    usuario@novamail.com / 123456789
-                </div>
-            </div>
+            <input type="file" id="pfp-file-input" accept="image/*">
+            <div class="profile-dd-name" id="dd-name"></div>
+            <div class="profile-dd-email" id="dd-email"></div>
+            <div id="dd-verified"></div>
+          </div>
+          <div class="dd-item" id="dd-logout">🚪 Cerrar sesión</div>
         </div>
+      </div>
     </div>
+  </div>
+  <div class="body-wrap">
+    <nav class="sidebar" id="main-sidebar">
+      <button class="compose-btn" id="compose-btn">
+        <svg viewBox="0 0 20 20" fill="none"><path d="M3 13.5V17h3.5l9-9L12 4.5l-9 9zm13.7-7.7a1 1 0 000-1.41l-2.1-2.1a1 1 0 00-1.41 0l-1.4 1.4 3.5 3.5 1.41-1.4z" fill="currentColor"/></svg>
+        Redactar
+      </button>
+      <div class="nav-item active" data-folder="inbox"><span class="nav-icon">📥</span> Recibidos <span class="nav-count" id="inbox-count"></span></div>
+      <div class="nav-item" data-folder="starred"><span class="nav-icon">⭐</span> Destacados</div>
+      <div class="nav-item" data-folder="important"><span class="nav-icon">🔖</span> Importantes</div>
+      <div class="nav-sep"></div>
+      <div class="nav-item" data-folder="sent"><span class="nav-icon">📤</span> Enviados</div>
+      <div class="nav-item" data-folder="drafts"><span class="nav-icon">📝</span> Borradores <span class="nav-count" id="draft-count"></span></div>
+      <div class="nav-item" data-folder="trash"><span class="nav-icon">🗑️</span> Papelera</div>
+    </nav>
+    <div style="flex:1;display:flex;overflow:hidden;">
+      <div class="email-list-pane" id="email-list-pane"></div>
+      <div id="email-viewer-pane" style="flex:1;overflow-y:auto;border-left:1px solid var(--border);display:none;"></div>
+    </div>
+  </div>
+</div>
 
-    <!-- PANTALLA DE REGISTRO (exactamente como Gmail) -->
-    <div id="register-screen" class="hidden min-h-screen flex items-center justify-center bg-white">
-        <div class="w-full max-w-md p-8">
-            <div class="flex items-center justify-center gap-3 mb-8">
-                <div class="w-12 h-12 bg-[#00b4d8] rounded-2xl flex items-center justify-center shadow-lg">
-                    <i class="fa-solid fa-envelope text-white text-3xl"></i>
-                </div>
-                <div>
-                    <h1 class="text-4xl font-bold text-[#00b4d8] tracking-tighter">NovaMail</h1>
-                    <p class="text-xs text-slate-500 -mt-1">correo del futuro</p>
-                </div>
-            </div>
+<!-- ADMIN -->
+<div id="admin-screen" class="hidden">
+  <div class="adm-sidebar">
+    <div class="adm-logo">
+      <svg viewBox="0 0 26 26" fill="none"><rect width="26" height="26" rx="7" fill="#a78bfa"/><path d="M4 8h18v12a1 1 0 01-1 1H5a1 1 0 01-1-1V8z" fill="#1a1a2e" opacity=".9"/><path d="M4 8l9 7 9-7" stroke="#a78bfa" stroke-width="1.8" fill="none"/></svg>
+      <span class="adm-logo-text">ZMail Admin</span>
+    </div>
+    <div class="adm-section-label">Panel</div>
+    <div class="adm-nav active" data-adm="dashboard"><span class="adm-nav-icon">📊</span> Dashboard</div>
+    <div class="adm-nav" data-adm="users"><span class="adm-nav-icon">👥</span> Usuarios</div>
+    <div class="adm-nav" data-adm="emails"><span class="adm-nav-icon">✉️</span> Correos</div>
+    <div class="adm-nav" data-adm="pfp"><span class="adm-nav-icon">🖼️</span> Fotos pendientes</div>
+    <div class="adm-sep"></div>
+    <div class="adm-section-label">Configuración</div>
+    <div class="adm-nav" data-adm="admins"><span class="adm-nav-icon">🛡️</span> Admins</div>
+    <div class="adm-nav" data-adm="system"><span class="adm-nav-icon">⚙️</span> Sistema</div>
+    <div class="adm-nav" data-adm="logs"><span class="adm-nav-icon">📋</span> Registros</div>
+    <div class="adm-sep"></div>
+    <div class="adm-nav" id="back-to-mail"><span class="adm-nav-icon">←</span> Volver al correo</div>
+  </div>
+  <div class="adm-content" id="adm-content"></div>
+</div>
 
-            <h2 class="text-2xl font-medium text-center mb-8">Crear cuenta de NovaMail</h2>
-            
-            <div class="space-y-4">
-                <input id="reg-name" type="text" placeholder="Nombre completo" 
-                       class="w-full px-4 py-4 border border-slate-300 rounded-3xl focus:outline-none focus:border-[#00b4d8]">
-                
-                <input id="reg-email" type="email" placeholder="Correo electrónico" 
-                       class="w-full px-4 py-4 border border-slate-300 rounded-3xl focus:outline-none focus:border-[#00b4d8]">
-                
-                <input id="reg-password" type="password" placeholder="Contraseña" 
-                       class="w-full px-4 py-4 border border-slate-300 rounded-3xl focus:outline-none focus:border-[#00b4d8]">
-                
-                <button onclick="handleRegister()" 
-                        class="w-full bg-[#00b4d8] hover:bg-[#0099bb] text-white py-4 rounded-3xl text-lg font-medium">
-                    Crear cuenta
-                </button>
+<!-- COMPOSE MODAL -->
+<div id="compose-modal" class="compose-modal hidden">
+  <div class="compose-header">
+    <span class="compose-header-title">Nuevo mensaje</span>
+    <button class="compose-close" id="compose-close">✕</button>
+  </div>
+  <div class="compose-field"><span class="compose-label">Para</span><input type="email" id="cm-to" placeholder="destinatario@zmail.com"></div>
+  <div class="compose-field"><span class="compose-label">Asunto</span><input type="text" id="cm-subject" placeholder=""></div>
+  <div class="compose-body"><textarea id="cm-body" placeholder="Escribe tu mensaje..."></textarea></div>
+  <div class="compose-footer">
+    <button class="send-btn" id="send-btn">Enviar</button>
+    <button class="compose-icon-btn" id="save-draft-btn" title="Guardar borrador">💾</button>
+    <button class="compose-icon-btn" style="margin-left:auto" id="discard-btn" title="Descartar">🗑️</button>
+  </div>
+</div>
 
-                <p onclick="switchToLogin()" class="text-center text-[#00b4d8] hover:underline cursor-pointer text-sm">
-                    ¿Ya tienes una cuenta? Inicia sesión
-                </p>
-            </div>
+<!-- MODAL CONTAINER -->
+<div id="modal-container"></div>
+
+<script>
+// ══════════════════════════════════
+// DATABASE (localStorage)
+// ══════════════════════════════════
+const DB = {
+  get users(){ return JSON.parse(localStorage.getItem('zm_users')||'[]') },
+  set users(v){ localStorage.setItem('zm_users', JSON.stringify(v)) },
+  get emails(){ return JSON.parse(localStorage.getItem('zm_emails')||'[]') },
+  set emails(v){ localStorage.setItem('zm_emails', JSON.stringify(v)) },
+  get pfpReqs(){ return JSON.parse(localStorage.getItem('zm_pfp')||'[]') },
+  set pfpReqs(v){ localStorage.setItem('zm_pfp', JSON.stringify(v)) },
+  get adminShares(){ return JSON.parse(localStorage.getItem('zm_admins')||'[]') },
+  set adminShares(v){ localStorage.setItem('zm_admins', JSON.stringify(v)) },
+  get settings(){ return JSON.parse(localStorage.getItem('zm_settings')||'{"systemDown":false,"sysMsg":"Sistema en mantenimiento. Vuelve pronto."}') },
+  set settings(v){ localStorage.setItem('zm_settings', JSON.stringify(v)) },
+};
+
+// ══════════════════════════════════
+// INIT
+// ══════════════════════════════════
+(function init(){
+  if(!DB.users.find(u=>u.email==='admin@zmail.com')){
+    const users = DB.users;
+    users.push({id:'admin-001',email:'admin@zmail.com',password:'Admin123!',name:'Admin ZMail',role:'admin',verified:true,banned:false,banReason:'',createdAt:new Date().toISOString(),profilePic:null,profilePicApproved:true});
+    DB.users = users;
+  }
+  if(!DB.emails.length){
+    const now = Date.now();
+    DB.emails = [
+      {id:'sys-1',from:'bienvenida@zmail.com',fromName:'ZMail',to:'admin@zmail.com',subject:'¡Bienvenido al panel ZMail!',body:'Hola Admin, tu plataforma está lista. Puedes gestionar usuarios, correos y configuración del sistema desde el panel de administración.\n\nAccede con el botón ⚙️ en la barra superior.',date:new Date(now-3600000).toISOString(),read:false,folder:'inbox',important:true,starred:false},
+      {id:'sys-2',from:'seguridad@zmail.com',fromName:'Seguridad ZMail',to:'admin@zmail.com',subject:'Tu cuenta fue verificada',body:'Hemos revisado tu cuenta y ha sido verificada exitosamente. El ícono ✓ ahora aparecerá junto a tu nombre.',date:new Date(now-7200000).toISOString(),read:true,folder:'inbox',important:false,starred:true},
+    ];
+  }
+})();
+
+// ══════════════════════════════════
+// STATE
+// ══════════════════════════════════
+let CU = null; // current user
+let currentFolder = 'inbox';
+let selectedEmailId = null;
+let searchQ = '';
+let admSection = 'dashboard';
+
+// ══════════════════════════════════
+// HELPERS
+// ══════════════════════════════════
+function uid(){ return Math.random().toString(36).slice(2)+Date.now().toString(36) }
+function initials(name){ return (name||'?').split(' ').map(x=>x[0]).join('').toUpperCase().slice(0,2) }
+const COLORS = ['#1a6cf6','#ea4335','#34a853','#f9ab00','#ab47bc','#00acc1','#ff7043','#5c6bc0','#0097a7','#388e3c'];
+function color(str){ let h=0; for(let c of (str||'')) h=((h<<5)-h)+c.charCodeAt(0); return COLORS[Math.abs(h)%COLORS.length] }
+function timeAgo(iso){
+  const d=new Date(iso), now=new Date(), diff=now-d;
+  if(diff<60000) return 'Ahora';
+  if(diff<3600000) return Math.floor(diff/60000)+'m';
+  if(diff<86400000){const h=Math.floor(diff/3600000);return h+'h';}
+  if(d.getFullYear()===now.getFullYear()) return d.toLocaleDateString('es-CO',{day:'numeric',month:'short'});
+  return d.toLocaleDateString('es-CO',{day:'numeric',month:'short',year:'2-digit'});
+}
+function isAdmin(u){ return u&&(u.role==='admin'||DB.adminShares.includes(u.email)) }
+function getUser(id){ return DB.users.find(u=>u.id===id) }
+function getUserByEmail(email){ return DB.users.find(u=>u.email===email) }
+function refreshUser(){ if(CU) CU = getUserByEmail(CU.email) || CU; }
+function saveUsers(arr){ DB.users = arr }
+
+function showToast(msg, dur=3200){
+  document.querySelectorAll('.toast').forEach(x=>x.remove());
+  const t=document.createElement('div'); t.className='toast';
+  t.innerHTML=`<span class="live-dot"></span>${msg}`;
+  document.body.appendChild(t);
+  setTimeout(()=>t.remove(),dur);
+}
+
+function showModal(html){
+  let c=document.getElementById('modal-container');
+  c.innerHTML=`<div class="modal-overlay" id="main-modal">${html}</div>`;
+  c.querySelector('#main-modal').addEventListener('click',e=>{ if(e.target===c.querySelector('#main-modal'))closeModal(); });
+}
+function closeModal(){ document.getElementById('modal-container').innerHTML=''; }
+
+function avatarHtml(name, email, pic, approved, size=38, fontSize=14){
+  if(pic&&approved) return `<img src="${pic}" style="width:${size}px;height:${size}px;border-radius:50%;object-fit:cover">`;
+  return `<span style="font-size:${fontSize}px">${initials(name||email)}</span>`;
+}
+
+// ══════════════════════════════════
+// ROUTING
+// ══════════════════════════════════
+function showScreen(id){
+  ['auth-screen','banned-screen','sysdown-screen','app-screen','admin-screen'].forEach(s=>{
+    document.getElementById(s).classList.add('hidden');
+  });
+  document.getElementById(id).classList.remove('hidden');
+}
+
+function route(){
+  if(!CU){ showScreen('auth-screen'); return; }
+  if(CU.banned){ showBanned(); return; }
+  const s=DB.settings;
+  if(s.systemDown && !isAdmin(CU)){ showSysDown(); return; }
+  if(CU._viewAdmin){ showAdminScreen(); return; }
+  showAppScreen();
+}
+
+function showBanned(){
+  showScreen('banned-screen');
+  document.getElementById('ban-reason-display').textContent = CU.banReason||'Violación de términos de servicio';
+}
+function showSysDown(){
+  showScreen('sysdown-screen');
+  document.getElementById('sysdown-msg-display').textContent = DB.settings.sysMsg;
+}
+
+function logout(){ CU=null; currentFolder='inbox'; selectedEmailId=null; searchQ=''; showScreen('auth-screen'); }
+
+// ══════════════════════════════════
+// AUTH
+// ══════════════════════════════════
+function showAuthMsg(msg, type='error'){
+  const el=document.getElementById('auth-msg-box');
+  el.innerHTML=`<div class="auth-msg ${type}">${msg}</div>`;
+}
+
+document.getElementById('to-register').onclick=()=>{
+  document.getElementById('auth-form-login').classList.add('hidden');
+  document.getElementById('auth-form-register').classList.remove('hidden');
+  document.getElementById('auth-title').textContent='Crear cuenta';
+  document.getElementById('auth-sub').textContent='Únete a ZMail gratis';
+  document.getElementById('auth-msg-box').innerHTML='';
+};
+document.getElementById('to-login').onclick=()=>{
+  document.getElementById('auth-form-register').classList.add('hidden');
+  document.getElementById('auth-form-login').classList.remove('hidden');
+  document.getElementById('auth-title').textContent='Iniciar sesión';
+  document.getElementById('auth-sub').textContent='Usa tu cuenta ZMail';
+  document.getElementById('auth-msg-box').innerHTML='';
+};
+
+document.getElementById('do-login').onclick=()=>{
+  const email=document.getElementById('li-email').value.trim();
+  const pass=document.getElementById('li-pass').value;
+  const u=DB.users.find(x=>x.email===email&&x.password===pass);
+  if(!u){showAuthMsg('Correo o contraseña incorrectos');return;}
+  CU=u; route();
+};
+document.getElementById('li-pass').addEventListener('keydown',e=>{ if(e.key==='Enter') document.getElementById('do-login').click(); });
+
+document.getElementById('do-register').onclick=()=>{
+  const name=document.getElementById('rg-name').value.trim();
+  const email=document.getElementById('rg-email').value.trim();
+  const pass=document.getElementById('rg-pass').value;
+  const pass2=document.getElementById('rg-pass2').value;
+  if(!name||!email||!pass){showAuthMsg('Completa todos los campos');return;}
+  if(!email.includes('@')){showAuthMsg('Correo inválido');return;}
+  if(pass.length<6){showAuthMsg('La contraseña debe tener al menos 6 caracteres');return;}
+  if(pass!==pass2){showAuthMsg('Las contraseñas no coinciden');return;}
+  if(DB.users.find(u=>u.email===email)){showAuthMsg('Ese correo ya está registrado');return;}
+  const nu={id:uid(),email,password:pass,name,role:'user',verified:false,banned:false,banReason:'',createdAt:new Date().toISOString(),profilePic:null,profilePicApproved:true};
+  const arr=DB.users; arr.push(nu); DB.users=arr;
+  // Welcome email
+  const em=DB.emails;
+  em.push({id:uid(),from:'bienvenida@zmail.com',fromName:'ZMail',to:email,subject:'¡Bienvenido a ZMail, '+name+'!',body:'Hola '+name+',\n\nTu cuenta ha sido creada exitosamente. Ahora puedes enviar y recibir correos en tiempo real.\n\nPara obtener la insignia de verificado ✓, un administrador revisará tu cuenta.\n\n¡Gracias por unirte a ZMail!',date:new Date().toISOString(),read:false,folder:'inbox',important:true,starred:false});
+  DB.emails=em;
+  CU=nu; route();
+};
+
+// ══════════════════════════════════
+// APP SCREEN
+// ══════════════════════════════════
+function showAppScreen(){
+  showScreen('app-screen');
+  // sysdown banner for admins
+  const banner=document.getElementById('sysdown-admin-banner');
+  if(DB.settings.systemDown && isAdmin(CU)){ banner.classList.remove('hidden'); document.getElementById('app-screen').classList.add('has-sysdown'); }
+  else{ banner.classList.add('hidden'); document.getElementById('app-screen').classList.remove('has-sysdown'); }
+
+  // topbar avatar
+  const ab=document.getElementById('avatar-topbar-btn');
+  ab.style.background=color(CU.email);
+  if(CU.profilePic&&CU.profilePicApproved){ ab.innerHTML=`<img src="${CU.profilePic}" style="width:38px;height:38px;border-radius:50%;object-fit:cover">`; }
+  else ab.textContent=initials(CU.name);
+
+  // admin button
+  document.getElementById('goto-admin-btn').style.display=isAdmin(CU)?'flex':'none';
+
+  updateSidebarCounts();
+  renderEmailList();
+  setupAppEvents();
+}
+
+function updateSidebarCounts(){
+  const unread=DB.emails.filter(e=>e.to===CU.email&&e.folder==='inbox'&&!e.read).length;
+  const drafts=DB.emails.filter(e=>e.from===CU.email&&e.folder==='draft').length;
+  document.getElementById('inbox-count').textContent=unread||'';
+  document.getElementById('draft-count').textContent=drafts||'';
+}
+
+function getEmails(){
+  let emails=[];
+  if(currentFolder==='inbox') emails=DB.emails.filter(e=>e.to===CU.email&&e.folder==='inbox');
+  else if(currentFolder==='sent') emails=DB.emails.filter(e=>e.from===CU.email&&e.folder==='sent');
+  else if(currentFolder==='drafts') emails=DB.emails.filter(e=>e.from===CU.email&&e.folder==='draft');
+  else if(currentFolder==='trash') emails=DB.emails.filter(e=>e.to===CU.email&&e.folder==='trash');
+  else if(currentFolder==='starred') emails=DB.emails.filter(e=>(e.to===CU.email||e.from===CU.email)&&e.starred);
+  else if(currentFolder==='important') emails=DB.emails.filter(e=>e.to===CU.email&&e.important);
+  if(searchQ){
+    const q=searchQ.toLowerCase();
+    emails=emails.filter(e=>e.subject.toLowerCase().includes(q)||e.body.toLowerCase().includes(q)||(e.fromName||'').toLowerCase().includes(q)||e.from.toLowerCase().includes(q)||(e.to||'').toLowerCase().includes(q));
+  }
+  return emails.sort((a,b)=>new Date(b.date)-new Date(a.date));
+}
+
+const folderNames={inbox:'Recibidos',sent:'Enviados',drafts:'Borradores',trash:'Papelera',starred:'Destacados',important:'Importantes'};
+
+function renderEmailList(){
+  const pane=document.getElementById('email-list-pane');
+  const emails=getEmails();
+  let html=`<div class="list-header"><span class="list-title">${folderNames[currentFolder]||''}</span><span class="list-count">${emails.length} mensaje${emails.length!==1?'s':''}</span></div>`;
+  if(!emails.length){
+    html+=`<div class="empty-state"><div class="empty-icon">📭</div><div class="empty-text">No hay mensajes aquí</div></div>`;
+  } else {
+    emails.forEach(e=>{
+      const senderUser=getUserByEmail(e.from);
+      const pic=senderUser?.profilePic; const picOk=senderUser?.profilePicApproved;
+      const isUnread=!e.read&&e.to===CU.email;
+      const isSelected=selectedEmailId===e.id;
+      const showVerified=senderUser?.verified&&searchQ;
+      html+=`<div class="email-row${isUnread?' unread':''}${isSelected?' selected':''}" data-eid="${e.id}">
+        <div class="email-avatar-sm" style="background:${color(e.from)}">${avatarHtml(e.fromName||e.from,e.from,pic,picOk,38,13)}</div>
+        <div class="email-info">
+          <div class="email-sender-row">
+            <span class="email-sender-name">${e.fromName||e.from}</span>
+            ${e.important?`<span style="font-size:13px">🔖</span>`:''}
+            ${showVerified?`<span class="verify-row-badge">✓</span>`:''}
+          </div>
+          <div class="email-subject-line">${e.subject} <span class="email-preview-text">— ${e.body.replace(/\n/g,' ').slice(0,55)}...</span></div>
         </div>
+        <span class="star-icon" data-star="${e.id}">${e.starred?'⭐':'☆'}</span>
+        <span class="email-date-col">${timeAgo(e.date)}</span>
+      </div>`;
+    });
+  }
+  pane.innerHTML=html;
+  // events
+  pane.querySelectorAll('.email-row').forEach(row=>{
+    row.onclick=()=>openEmail(row.dataset.eid);
+  });
+  pane.querySelectorAll('.star-icon').forEach(btn=>{
+    btn.onclick=e=>{e.stopPropagation();toggleStar(btn.dataset.star);};
+  });
+}
+
+function openEmail(eid){
+  const em=DB.emails.find(e=>e.id===eid); if(!em) return;
+  if(!em.read&&em.to===CU.email){ em.read=true; DB.emails=DB.emails; /* trigger setter */ const arr=DB.emails; const i=arr.findIndex(x=>x.id===eid); if(i>-1){arr[i].read=true;DB.emails=arr;} }
+  selectedEmailId=eid;
+  const vp=document.getElementById('email-viewer-pane');
+  vp.style.display='flex';
+  vp.style.flexDirection='column';
+  const senderUser=getUserByEmail(em.from);
+  const pic=senderUser?.profilePic; const picOk=senderUser?.profilePicApproved;
+  vp.innerHTML=`<div class="email-viewer">
+    <div class="viewer-toolbar">
+      <button class="tool-btn" id="vw-back" title="Volver">←</button>
+      <button class="tool-btn" id="vw-trash" title="Papelera">🗑️</button>
+      <button class="tool-btn" id="vw-star" title="Destacar">${em.starred?'⭐':'☆'}</button>
+      <button class="tool-btn" id="vw-important" title="Importante">${em.important?'🔖':'🏷️'}</button>
+      ${em.folder==='trash'?`<button class="tool-btn" id="vw-restore" title="Restaurar">↩️</button>`:''}
     </div>
+    <div class="viewer-subject">${em.subject}</div>
+    <div class="viewer-meta">
+      <div class="viewer-avatar" style="background:${color(em.from)}">${avatarHtml(em.fromName||em.from,em.from,pic,picOk,42,16)}</div>
+      <div>
+        <div class="viewer-from-name">${em.fromName||em.from} ${senderUser?.verified?`<span style="color:var(--z-blue);font-size:13px">✓ Verificado</span>`:''}</div>
+        <div class="viewer-from-detail">De: ${em.from} · Para: ${em.to}</div>
+        <div class="viewer-from-detail">${new Date(em.date).toLocaleString('es-CO',{weekday:'short',year:'numeric',month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'})}</div>
+      </div>
+    </div>
+    <div class="viewer-body">${em.body.replace(/\n/g,'<br>')}</div>
+    <div class="reply-section">
+      <button class="reply-btn-pill" id="vw-reply">↩ Responder</button>
+      <button class="reply-btn-pill" id="vw-forward">→ Reenviar</button>
+    </div>
+  </div>`;
+  document.getElementById('vw-back').onclick=()=>{ selectedEmailId=null; vp.style.display='none'; renderEmailList(); updateSidebarCounts(); };
+  document.getElementById('vw-trash').onclick=()=>moveEmail(eid,'trash');
+  document.getElementById('vw-star').onclick=()=>{ toggleStar(eid); openEmail(eid); };
+  document.getElementById('vw-important').onclick=()=>{ toggleImportant(eid); openEmail(eid); };
+  document.getElementById('vw-restore')?.addEventListener('click',()=>moveEmail(eid,'inbox'));
+  document.getElementById('vw-reply').onclick=()=>{ openCompose(em.from,'Re: '+em.subject); };
+  document.getElementById('vw-forward').onclick=()=>{ openCompose('','Fwd: '+em.subject,'\n\n--- Mensaje reenviado ---\nDe: '+em.from+'\n'+em.body); };
+  renderEmailList();
+  updateSidebarCounts();
+}
 
-    <!-- APLICACIÓN PRINCIPAL (interfaz idéntica a Gmail pero con NovaMail) -->
-    <div id="main-app" class="hidden min-h-screen flex flex-col">
-        <!-- HEADER -->
-        <header class="gmail-header text-white h-14 flex items-center px-4 shadow-md">
-            <div class="flex items-center gap-4 w-full">
-                <!-- Logo -->
-                <div class="flex items-center gap-2 cursor-pointer" onclick="toggleSidebar()">
-                    <div class="w-9 h-9 bg-white/20 rounded-2xl flex items-center justify-center">
-                        <i class="fa-solid fa-envelope text-2xl"></i>
-                    </div>
-                    <span class="font-bold text-2xl tracking-tighter">NovaMail</span>
-                </div>
+function moveEmail(eid, folder){
+  const arr=DB.emails; const i=arr.findIndex(e=>e.id===eid);
+  if(i>-1){ arr[i].folder=folder; DB.emails=arr; }
+  selectedEmailId=null;
+  document.getElementById('email-viewer-pane').style.display='none';
+  showToast(folder==='trash'?'🗑️ Movido a papelera':'↩️ Restaurado en Recibidos');
+  renderEmailList(); updateSidebarCounts();
+}
+function toggleStar(eid){
+  const arr=DB.emails; const i=arr.findIndex(e=>e.id===eid);
+  if(i>-1){ arr[i].starred=!arr[i].starred; DB.emails=arr; }
+  renderEmailList();
+}
+function toggleImportant(eid){
+  const arr=DB.emails; const i=arr.findIndex(e=>e.id===eid);
+  if(i>-1){ arr[i].important=!arr[i].important; DB.emails=arr; }
+}
 
-                <!-- Buscador -->
-                <div class="flex-1 max-w-2xl mx-8">
-                    <div onclick="if(currentTab==='admin') return; searchEmails()" 
-                         class="bg-white/20 hover:bg-white/30 text-white flex items-center rounded-3xl px-5 py-1.5 cursor-pointer">
-                        <i class="fa-solid fa-magnifying-glass mr-3"></i>
-                        <input id="search-input" 
-                               type="text" 
-                               placeholder="Buscar correos o usuarios..."
-                               class="flex-1 bg-transparent outline-none text-sm placeholder:text-white/70">
-                    </div>
-                </div>
+function setupAppEvents(){
+  // nav items
+  document.querySelectorAll('.nav-item[data-folder]').forEach(el=>{
+    el.onclick=()=>{
+      currentFolder=el.dataset.folder; searchQ='';
+      document.getElementById('search-input').value='';
+      document.querySelectorAll('.nav-item').forEach(x=>x.classList.remove('active'));
+      el.classList.add('active');
+      selectedEmailId=null;
+      document.getElementById('email-viewer-pane').style.display='none';
+      renderEmailList(); updateSidebarCounts();
+    };
+  });
+  document.getElementById('logo-home').onclick=()=>{
+    currentFolder='inbox'; searchQ='';
+    document.getElementById('search-input').value='';
+    document.querySelectorAll('.nav-item').forEach(x=>x.classList.remove('active'));
+    document.querySelector('.nav-item[data-folder="inbox"]').classList.add('active');
+    selectedEmailId=null; document.getElementById('email-viewer-pane').style.display='none';
+    renderEmailList(); updateSidebarCounts();
+  };
+  document.getElementById('search-input').oninput=e=>{ searchQ=e.target.value; renderEmailList(); };
+  document.getElementById('compose-btn').onclick=()=>openCompose();
+  document.getElementById('goto-admin-btn').onclick=()=>{ CU._viewAdmin=true; showAdminScreen(); };
+  // avatar dropdown
+  document.getElementById('avatar-topbar-btn').onclick=e=>{ e.stopPropagation(); updateProfileDD(); document.getElementById('profile-dropdown').classList.toggle('hidden'); };
+  document.addEventListener('click',()=>document.getElementById('profile-dropdown')?.classList.add('hidden'));
+  document.getElementById('dd-logout').onclick=()=>logout();
+  // pfp
+  document.getElementById('profile-pic-wrap').onclick=()=>document.getElementById('pfp-file-input').click();
+  document.getElementById('pfp-file-input').onchange=e=>uploadPFP(e);
+  // compose events (static)
+  document.getElementById('compose-close').onclick=()=>document.getElementById('compose-modal').classList.add('hidden');
+  document.getElementById('discard-btn').onclick=()=>document.getElementById('compose-modal').classList.add('hidden');
+  document.getElementById('save-draft-btn').onclick=saveDraft;
+  document.getElementById('send-btn').onclick=sendEmail;
+}
 
-                <!-- Botones de cuenta -->
-                <div class="flex items-center gap-5">
-                    <i onclick="composeEmail()" class="fa-solid fa-pen-to-square text-2xl cursor-pointer hover:scale-110"></i>
-                    <i onclick="showAccountMenu()" class="fa-solid fa-circle-user text-3xl cursor-pointer"></i>
-                    <div onclick="logout()" class="flex items-center text-sm font-medium cursor-pointer">
-                        <span id="user-display" class="mr-2"></span>
-                        <i class="fa-solid fa-sign-out-alt"></i>
-                    </div>
-                </div>
-            </div>
-        </header>
+function updateProfileDD(){
+  refreshUser();
+  const dd=document.getElementById('profile-dropdown');
+  document.getElementById('dd-name').textContent=CU.name;
+  document.getElementById('dd-email').textContent=CU.email;
+  document.getElementById('dd-verified').innerHTML=CU.verified?`<span class="verified-badge">✓ Cuenta verificada</span>`:'';
+  const pw=document.getElementById('profile-pic-wrap');
+  pw.style.background=color(CU.email);
+  if(CU.profilePic&&CU.profilePicApproved) pw.innerHTML=`<img src="${CU.profilePic}"><div class="pic-overlay">Cambiar<br>foto</div>`;
+  else pw.innerHTML=`<span style="font-size:26px;font-weight:600;color:#fff">${initials(CU.name)}</span><div class="pic-overlay">Cambiar<br>foto</div>`;
+}
 
-        <div class="flex flex-1 overflow-hidden">
-            <!-- SIDEBAR -->
-            <div id="sidebar" class="w-64 bg-white border-r border-slate-200 py-3 flex flex-col">
-                <div onclick="changeTab('inbox')" class="sidebar-link flex items-center gap-4 px-6 py-3 text-slate-700 font-medium cursor-pointer">
-                    <i class="fa-solid fa-inbox w-5"></i>
-                    <span>Bandeja de entrada</span>
-                </div>
-                <div onclick="changeTab('starred')" class="sidebar-link flex items-center gap-4 px-6 py-3 text-slate-700 font-medium cursor-pointer">
-                    <i class="fa-solid fa-star w-5"></i>
-                    <span>Destacados</span>
-                </div>
-                <div onclick="changeTab('sent')" class="sidebar-link flex items-center gap-4 px-6 py-3 text-slate-700 font-medium cursor-pointer">
-                    <i class="fa-solid fa-paper-plane w-5"></i>
-                    <span>Enviados</span>
-                </div>
-                <div onclick="changeTab('drafts')" class="sidebar-link flex items-center gap-4 px-6 py-3 text-slate-700 font-medium cursor-pointer">
-                    <i class="fa-solid fa-file w-5"></i>
-                    <span>Borradores</span>
-                </div>
-                <div onclick="changeTab('trash')" class="sidebar-link flex items-center gap-4 px-6 py-3 text-slate-700 font-medium cursor-pointer">
-                    <i class="fa-solid fa-trash w-5"></i>
-                    <span>Papelera</span>
-                </div>
-                <div class="border-t my-2"></div>
-                <!-- Solo visible para admins -->
-                <div onclick="changeTab('admin')" id="admin-sidebar-link" class="hidden sidebar-link flex items-center gap-4 px-6 py-3 text-[#00b4d8] font-semibold cursor-pointer">
-                    <i class="fa-solid fa-shield-halved w-5"></i>
-                    <span>Panel de Administrador</span>
-                </div>
+function uploadPFP(e){
+  const file=e.target.files[0]; if(!file) return;
+  const reader=new FileReader();
+  reader.onload=re=>{
+    const reqs=DB.pfpReqs;
+    if(reqs.find(r=>r.userId===CU.id&&r.status==='pending')){showToast('⏳ Ya tienes una solicitud pendiente');return;}
+    reqs.push({id:uid(),userId:CU.id,userEmail:CU.email,userName:CU.name,imageData:re.target.result,status:'pending',date:new Date().toISOString()});
+    DB.pfpReqs=reqs;
+    showToast('📸 Foto enviada para aprobación del admin');
+  };
+  reader.readAsDataURL(file);
+  e.target.value='';
+}
 
-                <div class="mt-auto px-6 text-xs text-slate-400">
-                    <div class="flex justify-between">
-                        <span>Espacio usado</span>
-                        <span>2.4 GB de 15 GB</span>
-                    </div>
-                    <div class="h-2 bg-slate-200 rounded-full mt-1 overflow-hidden">
-                        <div class="h-2 w-1/5 bg-[#00b4d8]"></div>
-                    </div>
-                </div>
-            </div>
+function openCompose(to='',subject='',body=''){
+  const cm=document.getElementById('compose-modal');
+  cm.classList.remove('hidden');
+  document.getElementById('cm-to').value=to;
+  document.getElementById('cm-subject').value=subject;
+  document.getElementById('cm-body').value=body;
+  if(!to) document.getElementById('cm-to').focus();
+  else document.getElementById('cm-body').focus();
+}
 
-            <!-- CONTENIDO PRINCIPAL -->
-            <div class="flex-1 flex flex-col overflow-hidden">
-                
-                <!-- INBOX, SENT, DRAFTS, TRASH -->
-                <div id="mail-content" class="flex-1 overflow-auto">
-                    <div class="p-4 border-b flex items-center justify-between bg-white sticky top-0 z-10">
-                        <div class="flex items-center gap-4">
-                            <input type="checkbox" class="w-5 h-5">
-                            <i onclick="refreshMail()" class="fa-solid fa-rotate-right cursor-pointer"></i>
-                            <h2 id="tab-title" class="font-semibold text-xl">Bandeja de entrada</h2>
-                        </div>
-                        <div class="text-sm text-slate-500">1-50 de 124</div>
-                    </div>
+function sendEmail(){
+  const to=document.getElementById('cm-to').value.trim();
+  const subject=document.getElementById('cm-subject').value.trim()||'(Sin asunto)';
+  const body=document.getElementById('cm-body').value.trim();
+  if(!to){showToast('⚠️ Ingresa un destinatario');return;}
+  const recipient=getUserByEmail(to);
+  if(!recipient){showToast('⚠️ Ese correo no existe en ZMail');return;}
+  if(recipient.banned){showToast('⚠️ No puedes enviar correos a ese usuario');return;}
+  const arr=DB.emails;
+  const emailData={id:uid(),from:CU.email,fromName:CU.name,to,subject,body,date:new Date().toISOString(),read:false,folder:'inbox',important:false,starred:false};
+  arr.push(emailData);
+  arr.push({...emailData,id:uid(),to,folder:'sent',read:true});
+  DB.emails=arr;
+  document.getElementById('compose-modal').classList.add('hidden');
+  showToast(`✓ Correo enviado a ${to}`);
+  renderEmailList(); updateSidebarCounts();
+  // Simulated real-time notification for sender
+  if(to===CU.email) setTimeout(()=>showToast('📨 Nuevo correo en tu bandeja'),300);
+}
 
-                    <!-- Lista de correos -->
-                    <div id="email-list" class="divide-y"></div>
-                </div>
+function saveDraft(){
+  const to=document.getElementById('cm-to').value.trim();
+  const subject=document.getElementById('cm-subject').value.trim();
+  const body=document.getElementById('cm-body').value.trim();
+  if(!subject&&!body){showToast('⚠️ El borrador está vacío');return;}
+  const arr=DB.emails;
+  arr.push({id:uid(),from:CU.email,fromName:CU.name,to:to||'',subject:subject||'(Sin asunto)',body,date:new Date().toISOString(),read:true,folder:'draft',important:false,starred:false});
+  DB.emails=arr;
+  document.getElementById('compose-modal').classList.add('hidden');
+  showToast('💾 Borrador guardado');
+  renderEmailList(); updateSidebarCounts();
+}
 
-                <!-- PANEL ADMIN (solo para admins) -->
-                <div id="admin-panel" class="hidden flex-1 bg-white p-6 overflow-auto">
-                    <h1 class="text-3xl font-bold mb-6 flex items-center gap-3">
-                        <i class="fa-solid fa-shield-halved"></i>
-                        Panel de Administrador NovaMail
-                    </h1>
+// ══════════════════════════════════
+// ADMIN SCREEN
+// ══════════════════════════════════
+function showAdminScreen(){
+  showScreen('admin-screen');
+  document.querySelectorAll('.adm-nav[data-adm]').forEach(el=>{
+    el.onclick=()=>{ admSection=el.dataset.adm; document.querySelectorAll('.adm-nav[data-adm]').forEach(x=>x.classList.remove('active')); el.classList.add('active'); renderAdmContent(); };
+  });
+  document.getElementById('back-to-mail').onclick=()=>{ CU._viewAdmin=false; showAppScreen(); };
+  renderAdmContent();
+}
 
-                    <!-- Opciones extra que pediste -->
-                    <div class="flex gap-4 mb-8">
-                        <button onclick="addAdminByEmail()" 
-                                class="flex-1 bg-[#00b4d8] text-white px-6 py-3 rounded-3xl font-medium flex items-center justify-center gap-2">
-                            <i class="fa-solid fa-user-plus"></i>
-                            Compartir panel admin (solo pon el correo)
-                        </button>
-                        <button onclick="showMassMessageModal()" 
-                                class="flex-1 border border-slate-300 px-6 py-3 rounded-3xl font-medium flex items-center justify-center gap-2">
-                            <i class="fa-solid fa-bullhorn"></i>
-                            Enviar mensaje global a todos
-                        </button>
-                        <button onclick="exportUserData()" 
-                                class="flex-1 border border-slate-300 px-6 py-3 rounded-3xl font-medium flex items-center justify-center gap-2">
-                            <i class="fa-solid fa-download"></i>
-                            Exportar todos los usuarios
-                        </button>
-                    </div>
+function renderAdmContent(){
+  const c=document.getElementById('adm-content');
+  const titles={dashboard:'Dashboard',users:'Gestión de usuarios',emails:'Todos los correos',pfp:'Fotos pendientes',admins:'Administradores',system:'Configuración del sistema',logs:'Registros de actividad'};
+  let html=`<div class="adm-topbar"><h1 class="adm-page-title">${titles[admSection]}</h1><div class="adm-status"><span class="live-dot"></span> En vivo · ${CU.email}</div></div>`;
+  html+=admSections[admSection]();
+  c.innerHTML=html;
+  admSectionEvents[admSection]?.();
+}
 
-                    <!-- Tabla de usuarios -->
-                    <div class="overflow-x-auto">
-                        <table class="w-full">
-                            <thead>
-                                <tr class="border-b text-left text-slate-500 text-sm">
-                                    <th class="py-4 px-6">Nombre</th>
-                                    <th class="py-4 px-6">Correo</th>
-                                    <th class="py-4 px-6">Contraseña <span class="text-red-500 text-xs">(demo)</span></th>
-                                    <th class="py-4 px-6">Verificado</th>
-                                    <th class="py-4 px-6">Estado</th>
-                                    <th class="py-4 px-6">Acciones</th>
-                                </tr>
-                            </thead>
-                            <tbody id="users-table" class="text-sm"></tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
+const admSections = {
+  dashboard(){
+    const users=DB.users.filter(u=>u.role!=='admin');
+    const totalUsers=DB.users.length;
+    const verified=DB.users.filter(u=>u.verified).length;
+    const banned=DB.users.filter(u=>u.banned).length;
+    const totalEmails=DB.emails.length;
+    const recent=DB.emails.slice().sort((a,b)=>new Date(b.date)-new Date(a.date)).slice(0,6);
+    return `<div class="stat-grid">
+      <div class="stat-card"><div class="stat-num" style="color:var(--z-blue)">${totalUsers}</div><div class="stat-label">Usuarios totales</div></div>
+      <div class="stat-card"><div class="stat-num" style="color:var(--z-green)">${verified}</div><div class="stat-label">Verificados</div></div>
+      <div class="stat-card"><div class="stat-num" style="color:var(--z-red)">${banned}</div><div class="stat-label">Baneados</div></div>
+      <div class="stat-card"><div class="stat-num" style="color:var(--z-purple)">${totalEmails}</div><div class="stat-label">Correos totales</div></div>
+    </div>
+    <div class="adm-card">
+      <div class="adm-card-title">Actividad reciente</div>
+      ${recent.map(e=>`<div class="activity-row">
+        <div class="activity-ava" style="background:${color(e.from)}">${initials(e.fromName||e.from)}</div>
+        <div class="activity-info">
+          <div class="activity-main">${e.fromName||e.from} → ${e.to}: <b>${e.subject}</b></div>
+          <div class="activity-sub">${e.body.slice(0,60)}...</div>
         </div>
-    </div>
-
-    <!-- MODAL COMPONER CORREO -->
-    <div id="compose-modal" onclick="if(event.target.id==='compose-modal')hideCompose()" 
-         class="hidden fixed inset-0 bg-black/60 flex items-end md:items-center justify-center z-50">
-        <div onclick="event.stopImmediatePropagation()" 
-             class="bg-white w-full max-w-2xl rounded-t-3xl md:rounded-3xl shadow-2xl">
-            <div class="flex justify-between px-6 py-4 border-b">
-                <span class="font-semibold text-lg">Nuevo mensaje</span>
-                <i onclick="hideCompose()" class="fa-solid fa-xmark text-2xl cursor-pointer"></i>
+        <span class="activity-time">${timeAgo(e.date)}</span>
+      </div>`).join('')}
+    </div>`;
+  },
+  users(){
+    const users=DB.users;
+    return `<div class="adm-card">
+      <div class="adm-card-title">Todos los usuarios (${users.length})</div>
+      <div style="overflow-x:auto">
+      <table class="tbl">
+        <tr><th>Usuario</th><th>Correo</th><th>Verificado</th><th>Estado</th><th>Rol</th><th>Contraseña</th><th>Registro</th><th>Acciones</th></tr>
+        ${users.map(u=>`<tr>
+          <td><div style="display:flex;align-items:center;gap:8px">
+            <div style="width:34px;height:34px;border-radius:50%;background:${color(u.email)};color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;overflow:hidden;flex-shrink:0">
+              ${u.profilePic&&u.profilePicApproved?`<img src="${u.profilePic}" style="width:34px;height:34px;object-fit:cover;border-radius:50%">`:`${initials(u.name)}`}
             </div>
-            <div class="p-6 space-y-4">
-                <input id="compose-to" type="text" placeholder="Para" class="w-full border-b py-3 focus:outline-none">
-                <input id="compose-subject" type="text" placeholder="Asunto" class="w-full border-b py-3 focus:outline-none">
-                <textarea id="compose-body" rows="12" class="w-full focus:outline-none resize-none" placeholder="Escribe tu mensaje..."></textarea>
-            </div>
-            <div class="flex justify-end px-6 py-4 border-t">
-                <button onclick="sendEmail()" 
-                        class="bg-[#00b4d8] text-white px-10 py-3 rounded-3xl flex items-center gap-2">
-                    <i class="fa-solid fa-paper-plane"></i>
-                    Enviar
-                </button>
-            </div>
+            <span style="font-weight:500">${u.name}</span>
+          </div></td>
+          <td style="color:var(--text3)">${u.email}</td>
+          <td><label class="toggle"><input type="checkbox" class="verify-toggle" data-uid="${u.id}" ${u.verified?'checked':''}><span class="toggle-track"></span></label></td>
+          <td>${u.banned?`<span class="badge badge-red">Baneado</span>`:`<span class="badge badge-green">Activo</span>`}</td>
+          <td><span class="badge ${u.role==='admin'?'badge-purple':DB.adminShares.includes(u.email)?'badge-orange':'badge-gray'}">${u.role==='admin'?'Super Admin':DB.adminShares.includes(u.email)?'Admin':'Usuario'}</span></td>
+          <td class="pw-cell" title="Contraseña: ${u.password}">${u.password}</td>
+          <td style="font-size:12px;color:var(--text3)">${new Date(u.createdAt).toLocaleDateString('es-CO')}</td>
+          <td><div style="display:flex;gap:4px;flex-wrap:wrap">
+            ${u.banned
+              ?`<button class="btn-xs btn-success unban-btn" data-uid="${u.id}">Quitar baneo</button>`
+              :`<button class="btn-xs btn-danger ban-btn" data-uid="${u.id}">Banear</button>`}
+            <button class="btn-xs btn-outline-gray view-user-emails" data-email="${u.email}">Ver correos</button>
+          </div></td>
+        </tr>`).join('')}
+      </table>
+      </div>
+    </div>`;
+  },
+  emails(){
+    const emails=DB.emails.slice().sort((a,b)=>new Date(b.date)-new Date(a.date));
+    return `<div class="adm-card">
+      <div class="adm-card-title">Todos los correos (${emails.length})</div>
+      <div style="overflow-x:auto">
+      <table class="tbl">
+        <tr><th>De</th><th>Para</th><th>Asunto</th><th>Carpeta</th><th>Leído</th><th>Fecha</th><th>Acciones</th></tr>
+        ${emails.map(e=>`<tr>
+          <td style="font-size:12px">${e.from}</td>
+          <td style="font-size:12px">${e.to}</td>
+          <td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:13px">${e.subject}</td>
+          <td><span class="badge badge-gray">${e.folder}</span></td>
+          <td>${e.read?'✓':'—'}</td>
+          <td style="font-size:12px;color:var(--text3)">${timeAgo(e.date)}</td>
+          <td><button class="btn-xs btn-danger del-email-btn" data-eid="${e.id}">Eliminar</button></td>
+        </tr>`).join('')}
+      </table>
+      </div>
+    </div>`;
+  },
+  pfp(){
+    const pending=DB.pfpReqs.filter(r=>r.status==='pending');
+    const done=DB.pfpReqs.filter(r=>r.status!=='pending');
+    return `<div class="adm-card">
+      <div class="adm-card-title">Pendientes de aprobación (${pending.length})</div>
+      ${pending.length===0?`<p style="color:var(--text3);text-align:center;padding:20px">Sin solicitudes pendientes ✓</p>`:
+      pending.map(r=>`<div class="pfp-req-row">
+        <img src="${r.imageData}" class="pfp-preview">
+        <div>
+          <div style="font-weight:500">${r.userName}</div>
+          <div style="font-size:12px;color:var(--text3)">${r.userEmail}</div>
+          <div style="font-size:11px;color:var(--text3)">${timeAgo(r.date)}</div>
         </div>
-    </div>
-
-    <!-- MODAL BANEAR -->
-    <div id="ban-modal" onclick="if(event.target.id==='ban-modal')hideBanModal()" 
-         class="hidden fixed inset-0 bg-black/60 flex items-center justify-center z-50">
-        <div class="bg-white rounded-3xl p-8 max-w-md w-full modal">
-            <h3 class="text-2xl font-semibold mb-6">Banear usuario</h3>
-            <input id="ban-reason" type="text" placeholder="Motivo del ban (obligatorio)" 
-                   class="w-full px-5 py-4 border border-slate-300 rounded-3xl mb-6">
-            <div class="flex justify-end gap-3">
-                <button onclick="hideBanModal()" class="px-8 py-3 text-slate-600">Cancelar</button>
-                <button onclick="confirmBan()" class="bg-red-600 text-white px-8 py-3 rounded-3xl">Banear permanentemente</button>
-            </div>
+        <div style="margin-left:auto;display:flex;gap:8px">
+          <button class="btn-xs btn-success approve-pfp" data-rid="${r.id}" data-uid="${r.userId}">✓ Aprobar</button>
+          <button class="btn-xs btn-danger reject-pfp" data-rid="${r.id}">✗ Rechazar</button>
         </div>
+      </div>`).join('')}
+      ${done.length?`<div style="margin-top:16px"><div class="adm-card-title" style="font-size:14px">Historial</div>
+        ${done.slice(-10).map(r=>`<div style="display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid #f1f3f4">
+          <img src="${r.imageData}" style="width:32px;height:32px;border-radius:50%;object-fit:cover">
+          <span style="font-size:13px">${r.userEmail}</span>
+          <span class="badge ${r.status==='approved'?'badge-green':'badge-red'}" style="margin-left:auto">${r.status==='approved'?'Aprobada':'Rechazada'}</span>
+        </div>`).join('')}
+      </div>`:''}
+    </div>`;
+  },
+  admins(){
+    const allAdmins=[
+      ...DB.users.filter(u=>u.role==='admin').map(u=>({...u,type:'super'})),
+      ...DB.adminShares.map(email=>{ const u=getUserByEmail(email); return {email,name:u?.name||email,type:'shared'}; })
+    ];
+    return `<div class="adm-card">
+      <div class="adm-card-title">Compartir acceso de administrador</div>
+      <p style="font-size:13px;color:var(--text3);margin-bottom:14px">Ingresa el correo de un usuario registrado para darle acceso al panel de administración.</p>
+      <div style="display:flex;gap:8px">
+        <input class="modal-input" id="share-email-input" placeholder="correo@zmail.com" style="margin:0;flex:1">
+        <button class="btn-xs btn-outline-blue" id="share-admin-btn" style="padding:8px 16px;font-size:13px">Agregar</button>
+      </div>
     </div>
-
-    <!-- MODAL MENSAJE GLOBAL -->
-    <div id="mass-modal" onclick="if(event.target.id==='mass-modal')hideMassModal()" 
-         class="hidden fixed inset-0 bg-black/60 flex items-center justify-center z-50">
-        <div class="bg-white rounded-3xl p-8 max-w-md w-full modal">
-            <h3 class="text-2xl font-semibold mb-4">Enviar mensaje a TODOS los usuarios</h3>
-            <textarea id="mass-text" rows="5" class="w-full border border-slate-300 rounded-3xl p-5" placeholder="Escribe el mensaje que verán al iniciar sesión..."></textarea>
-            <div class="flex justify-end gap-3 mt-6">
-                <button onclick="hideMassModal()" class="px-8 py-3 text-slate-600">Cancelar</button>
-                <button onclick="sendMassMessage()" class="bg-[#00b4d8] text-white px-8 py-3 rounded-3xl">Enviar a todos</button>
-            </div>
+    <div class="adm-card">
+      <div class="adm-card-title">Admins actuales (${allAdmins.length})</div>
+      ${allAdmins.map(u=>`<div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid #f1f3f4">
+        <div style="width:36px;height:36px;border-radius:50%;background:${color(u.email)};color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600">${initials(u.name)}</div>
+        <div>
+          <div style="font-size:14px;font-weight:500">${u.name}</div>
+          <div style="font-size:12px;color:var(--text3)">${u.email}</div>
         </div>
-    </div>
-
-    <!-- MODAL OLVIDASTE CONTRASEÑA -->
-    <div id="forgot-modal" onclick="if(event.target.id==='forgot-modal')hideForgotModal()" 
-         class="hidden fixed inset-0 bg-black/60 flex items-center justify-center z-50">
-        <div class="bg-white rounded-3xl p-8 max-w-md w-full modal text-center">
-            <h3 class="text-2xl font-semibold mb-6">Recuperar contraseña</h3>
-            <p class="mb-6 text-slate-600">En una versión real se enviaría un enlace. Aquí solo es demo.</p>
-            <input id="forgot-email" type="email" placeholder="Tu correo" class="w-full px-5 py-4 border border-slate-300 rounded-3xl mb-6">
-            <button onclick="fakeRecoverPassword()" class="bg-[#00b4d8] text-white px-10 py-3 rounded-3xl w-full">Enviar enlace de recuperación</button>
+        <span class="badge ${u.type==='super'?'badge-purple':'badge-orange'}" style="margin-left:auto">${u.type==='super'?'Super Admin':'Admin compartido'}</span>
+        ${u.type==='shared'?`<button class="btn-xs btn-danger remove-admin" data-email="${u.email}">Quitar</button>`:''}
+      </div>`).join('')}
+    </div>`;
+  },
+  system(){
+    const s=DB.settings;
+    return `<div class="adm-card">
+      <div class="adm-card-title">🔧 Sistema Caído</div>
+      <div style="display:flex;align-items:center;gap:16px;padding:12px 0;border-bottom:1px solid var(--border);margin-bottom:16px">
+        <div style="flex:1">
+          <div style="font-weight:500">Activar modo mantenimiento</div>
+          <div style="font-size:13px;color:var(--text3);margin-top:2px">Los usuarios normales verán la página de mantenimiento. Los administradores no se ven afectados.</div>
         </div>
+        <label class="toggle"><input type="checkbox" id="sysdown-toggle" ${s.systemDown?'checked':''}><span class="toggle-track"></span></label>
+      </div>
+      <div style="font-weight:500;margin-bottom:8px">Mensaje de mantenimiento</div>
+      <input class="modal-input" id="sysdown-msg-input" value="${s.sysMsg}" style="margin-bottom:8px">
+      <button class="btn-xs btn-outline-blue" id="save-sysdown-msg">Guardar mensaje</button>
     </div>
+    <div class="adm-card">
+      <div class="adm-card-title">📊 Estadísticas del sistema</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+        ${[['Usuarios','👥',DB.users.length],['Correos','✉️',DB.emails.length],['Admins','🛡️',DB.users.filter(u=>u.role==='admin').length+DB.adminShares.length],['Fotos pendientes','🖼️',DB.pfpReqs.filter(r=>r.status==='pending').length],['Usuarios baneados','🚫',DB.users.filter(u=>u.banned).length],['Cuentas verificadas','✓',DB.users.filter(u=>u.verified).length]].map(([label,icon,val])=>`
+          <div style="background:var(--surface2);border-radius:var(--radius-sm);padding:14px;display:flex;align-items:center;gap:10px">
+            <span style="font-size:20px">${icon}</span>
+            <div><div style="font-size:18px;font-weight:600">${val}</div><div style="font-size:12px;color:var(--text3)">${label}</div></div>
+          </div>`).join('')}
+      </div>
+    </div>`;
+  },
+  logs(){
+    const logs=DB.emails.slice().sort((a,b)=>new Date(b.date)-new Date(a.date));
+    return `<div class="adm-card">
+      <div class="adm-card-title">📋 Registro de correos (${logs.length})</div>
+      <div style="overflow-x:auto">
+      <table class="tbl">
+        <tr><th>Hora</th><th>De</th><th>Para</th><th>Asunto</th><th>Carpeta</th><th>Estado</th></tr>
+        ${logs.map(e=>`<tr>
+          <td style="font-size:12px;color:var(--text3);white-space:nowrap">${timeAgo(e.date)}</td>
+          <td style="font-size:12px">${e.from}</td>
+          <td style="font-size:12px">${e.to}</td>
+          <td style="font-size:12px;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${e.subject}</td>
+          <td><span class="badge ${e.folder==='inbox'?'badge-blue':e.folder==='trash'?'badge-red':'badge-gray'}">${e.folder}</span></td>
+          <td><span class="badge ${e.read?'badge-green':'badge-orange'}">${e.read?'Leído':'Sin leer'}</span></td>
+        </tr>`).join('')}
+      </table>
+      </div>
+    </div>`;
+  }
+};
 
-    <!-- Toast para mensajes -->
-    <div id="toast" onclick="this.classList.add('hidden')" 
-         class="hidden fixed bottom-6 right-6 bg-slate-800 text-white px-6 py-4 rounded-3xl shadow-2xl flex items-center gap-3">
-        <span id="toast-text" class="font-medium"></span>
+const admSectionEvents = {
+  users(){
+    document.querySelectorAll('.verify-toggle').forEach(el=>{
+      el.onchange=()=>{
+        const arr=DB.users; const i=arr.findIndex(u=>u.id===el.dataset.uid);
+        if(i>-1){ arr[i].verified=el.checked; DB.users=arr; showToast(el.checked?'✓ Usuario verificado':'Usuario desverificado'); }
+      };
+    });
+    document.querySelectorAll('.ban-btn').forEach(el=>{
+      el.onclick=()=>{ const u=DB.users.find(x=>x.id===el.dataset.uid); if(u) showBanModal(u); };
+    });
+    document.querySelectorAll('.unban-btn').forEach(el=>{
+      el.onclick=()=>{
+        const arr=DB.users; const i=arr.findIndex(u=>u.id===el.dataset.uid);
+        if(i>-1){ arr[i].banned=false; arr[i].banReason=''; DB.users=arr; showToast('✓ Baneo removido'); renderAdmContent(); }
+      };
+    });
+    document.querySelectorAll('.view-user-emails').forEach(el=>{
+      el.onclick=()=>{
+        const email=el.dataset.email;
+        const userEmails=DB.emails.filter(e=>e.from===email||e.to===email).sort((a,b)=>new Date(b.date)-new Date(a.date));
+        showModal(`<div class="modal-box" style="max-width:600px;max-height:80vh;overflow-y:auto">
+          <div class="modal-title">Correos de ${email}</div>
+          <div class="modal-subtitle">${userEmails.length} mensajes encontrados</div>
+          ${userEmails.length===0?'<p style="color:var(--text3)">Sin correos</p>':
+          userEmails.map(e=>`<div style="padding:10px 0;border-bottom:1px solid var(--border)">
+            <div style="font-size:14px;font-weight:500">${e.subject}</div>
+            <div style="font-size:12px;color:var(--text3)">${e.from} → ${e.to} · ${timeAgo(e.date)} · <span class="badge badge-gray">${e.folder}</span></div>
+          </div>`).join('')}
+          <div class="modal-btns"><button class="btn-xs btn-outline-gray" onclick="closeModal()">Cerrar</button></div>
+        </div>`);
+      };
+    });
+  },
+  emails(){
+    document.querySelectorAll('.del-email-btn').forEach(el=>{
+      el.onclick=()=>{
+        const arr=DB.emails; const i=arr.findIndex(e=>e.id===el.dataset.eid);
+        if(i>-1){ arr.splice(i,1); DB.emails=arr; showToast('Correo eliminado'); renderAdmContent(); }
+      };
+    });
+  },
+  pfp(){
+    document.querySelectorAll('.approve-pfp').forEach(el=>{
+      el.onclick=()=>{
+        const reqs=DB.pfpReqs; const ri=reqs.findIndex(r=>r.id===el.dataset.rid);
+        const users=DB.users; const ui=users.findIndex(u=>u.id===el.dataset.uid);
+        if(ri>-1&&ui>-1){
+          const img=reqs[ri].imageData;
+          reqs[ri].status='approved';
+          users[ui].profilePic=img; users[ui].profilePicApproved=true;
+          DB.pfpReqs=reqs; DB.users=users;
+          if(CU.id===el.dataset.uid){ CU.profilePic=img; CU.profilePicApproved=true; }
+          showToast('✓ Foto de perfil aprobada'); renderAdmContent();
+        }
+      };
+    });
+    document.querySelectorAll('.reject-pfp').forEach(el=>{
+      el.onclick=()=>{
+        const reqs=DB.pfpReqs; const ri=reqs.findIndex(r=>r.id===el.dataset.rid);
+        if(ri>-1){ reqs[ri].status='rejected'; DB.pfpReqs=reqs; showToast('Foto rechazada'); renderAdmContent(); }
+      };
+    });
+  },
+  admins(){
+    document.getElementById('share-admin-btn').onclick=()=>{
+      const email=document.getElementById('share-email-input').value.trim();
+      if(!email){showToast('⚠️ Ingresa un correo');return;}
+      if(!getUserByEmail(email)){showToast('⚠️ Usuario no encontrado');return;}
+      const arr=DB.adminShares;
+      if(arr.includes(email)){showToast('Ya es administrador');return;}
+      arr.push(email); DB.adminShares=arr;
+      showToast(`✓ ${email} ahora es administrador`); renderAdmContent();
+    };
+    document.querySelectorAll('.remove-admin').forEach(el=>{
+      el.onclick=()=>{
+        const arr=DB.adminShares; const i=arr.indexOf(el.dataset.email);
+        if(i>-1){ arr.splice(i,1); DB.adminShares=arr; showToast('Admin removido'); renderAdmContent(); }
+      };
+    });
+  },
+  system(){
+    document.getElementById('sysdown-toggle').onchange=e=>{
+      const s=DB.settings; s.systemDown=e.target.checked; DB.settings=s;
+      showToast(e.target.checked?'🔧 Sistema marcado como caído':'✓ Sistema restaurado');
+      // refresh banner
+      const banner=document.getElementById('sysdown-admin-banner');
+      banner.classList.toggle('hidden',!e.target.checked);
+    };
+    document.getElementById('save-sysdown-msg').onclick=()=>{
+      const msg=document.getElementById('sysdown-msg-input').value.trim();
+      if(!msg){showToast('El mensaje no puede estar vacío');return;}
+      const s=DB.settings; s.sysMsg=msg; DB.settings=s;
+      showToast('✓ Mensaje de mantenimiento guardado');
+    };
+  }
+};
+
+function showBanModal(user){
+  showModal(`<div class="modal-box">
+    <div class="modal-title">🚫 Banear usuario</div>
+    <div class="modal-subtitle">Vas a suspender la cuenta de <b>${user.name}</b> (${user.email})</div>
+    <label style="font-size:13px;font-weight:500;display:block;margin-bottom:6px">Motivo del baneo *</label>
+    <textarea id="ban-reason-input" class="modal-input" style="min-height:90px;resize:none" placeholder="Describe el motivo de la suspensión..."></textarea>
+    <label style="font-size:13px;font-weight:500;display:block;margin-bottom:6px">Mensaje para el usuario</label>
+    <input id="ban-msg-input" class="modal-input" value="Tu cuenta ha sido suspendida por violación de los términos de servicio.">
+    <div class="modal-btns">
+      <button class="btn-xs btn-outline-gray" onclick="closeModal()">Cancelar</button>
+      <button class="btn-xs btn-danger" id="confirm-ban-btn">Confirmar baneo</button>
     </div>
-
-    <script>
-        // ==================== DATOS DE DEMO ====================
-        let users = [
-            {
-                id: 1,
-                name: "Administrador",
-                email: "admin@novamail.com",
-                password: "admin123",
-                verified: true,
-                banned: false,
-                banReason: ""
-            },
-            {
-                id: 2,
-                name: "Usuario Demo",
-                email: "usuario@novamail.com",
-                password: "123456",
-                verified: false,
-                banned: false,
-                banReason: ""
-            },
-            {
-                id: 3,
-                name: "María López",
-                email: "maria@novamail.com",
-                password: "maria2025",
-                verified: true,
-                banned: false,
-                banReason: ""
-            },
-            {
-                id: 4,
-                name: "Carlos Ruiz",
-                email: "carlos@novamail.com",
-                password: "carlos99",
-                verified: false,
-                banned: true,
-                banReason: "Spam repetido"
-            }
-        ]
-
-        let admins = ["admin@novamail.com"] // correos que tienen acceso al panel
-
-        // Correos de ejemplo (por usuario)
-        let mailboxes = {
-            "admin@novamail.com": {
-                inbox: [
-                    {id:1, from:"maria@novamail.com", subject:"Reunión mañana", body:"Hola, ¿confirmamos la reunión a las 10?", date:"hace 2h", read:false, verifiedSender:true},
-                    {id:2, from:"noticias@novamail.com", subject:"Nuevo update de NovaMail", body:"¡Ya puedes usar IA en tus correos!", date:"hace 5h", read:true, verifiedSender:false}
-                ],
-                sent: [],
-                drafts: [{id:3, to:"amigo@novamail.com", subject:"Borrador sin terminar", body:"Hola, te quería decir que...", date:"hace 1d"}],
-                trash: [],
-                starred: []
-            },
-            "usuario@novamail.com": {
-                inbox: [
-                    {id:4, from:"admin@novamail.com", subject:"Bienvenido a NovaMail", body:"Gracias por usar nuestra plataforma.", date:"hace 3h", read:false, verifiedSender:true},
-                    {id:5, from:"carlos@novamail.com", subject:"Proyecto", body:"¿Avanzaste con el diseño?", date:"ayer", read:true, verifiedSender:false}
-                ],
-                sent: [],
-                drafts: [],
-                trash: [],
-                starred: []
-            },
-            "maria@novamail.com": {
-                inbox: [],
-                sent: [],
-                drafts: [],
-                trash: [],
-                starred: []
-            },
-            "carlos@novamail.com": {
-                inbox: [],
-                sent: [],
-                drafts: [],
-                trash: [],
-                starred: []
-            }
-        }
-
-        // Mensaje global para usuarios baneados o anuncios
-        let globalBannerMessage = ""
-
-        let currentUser = null
-        let currentTab = "inbox"
-
-        // ==================== FUNCIONES PRINCIPALES ====================
-
-        function tailwindInit() {
-            return {
-                config(userConfig = {}) {
-                    return {
-                        configUser: userConfig,
-                        theme: { extend: {} },
-                        plugins: [],
-                    }
-                },
-                theme: {
-                    extend: {},
-                },
-            }
-        }
-        // Tailwind listo
-        document.documentElement.setAttribute('data-tailwind-config', JSON.stringify(tailwindInit()))
-
-        function showToast(text) {
-            const toast = document.getElementById('toast')
-            document.getElementById('toast-text').innerHTML = text
-            toast.classList.remove('hidden')
-            setTimeout(() => toast.classList.add('hidden'), 3500)
-        }
-
-        function switchToRegister() {
-            document.getElementById('login-screen').classList.add('hidden')
-            document.getElementById('register-screen').classList.remove('hidden')
-        }
-
-        function switchToLogin() {
-            document.getElementById('register-screen').classList.add('hidden')
-            document.getElementById('login-screen').classList.remove('hidden')
-        }
-
-        function handleLogin() {
-            const email = document.getElementById('login-email').value.trim()
-            const pass = document.getElementById('login-password').value.trim()
-
-            const user = users.find(u => u.email === email && u.password === pass)
-
-            if (!user) {
-                showToast('❌ Correo o contraseña incorrectos')
-                return
-            }
-
-            if (user.banned) {
-                showToast(`🚫 Tu cuenta está baneada.<br>Motivo: <strong>${user.banReason}</strong>`)
-                return
-            }
-
-            currentUser = user
-            document.getElementById('login-screen').classList.add('hidden')
-            document.getElementById('main-app').classList.remove('hidden')
-            document.getElementById('user-display').innerHTML = `
-                <span class="text-sm">${user.name}</span>
-                ${user.verified ? `<i class="fa-solid fa-check-circle text-[#00b4d8] verified-badge"></i>` : ''}
-            `
-
-            // Mostrar link admin solo si es admin
-            if (admins.includes(user.email)) {
-                document.getElementById('admin-sidebar-link').classList.remove('hidden')
-            }
-
-            renderCurrentTab()
-            showToast('✅ Bienvenido a NovaMail')
-        }
-
-        function handleRegister() {
-            const name = document.getElementById('reg-name').value.trim()
-            const email = document.getElementById('reg-email').value.trim()
-            const pass = document.getElementById('reg-password').value.trim()
-
-            if (!name || !email || !pass) {
-                showToast('❌ Completa todos los campos')
-                return
-            }
-
-            if (users.find(u => u.email === email)) {
-                showToast('❌ Ese correo ya está registrado')
-                return
-            }
-
-            const newUser = {
-                id: Date.now(),
-                name: name,
-                email: email,
-                password: pass,
-                verified: false,
-                banned: false,
-                banReason: ""
-            }
-
-            users.push(newUser)
-            mailboxes[email] = { inbox: [], sent: [], drafts: [], trash: [], starred: [] }
-
-            showToast('✅ ¡Cuenta creada! Ahora inicia sesión')
-            switchToLogin()
-        }
-
-        function logout() {
-            currentUser = null
-            document.getElementById('main-app').classList.add('hidden')
-            document.getElementById('login-screen').classList.remove('hidden')
-            document.getElementById('admin-sidebar-link').classList.add('hidden')
-            // Limpiar inputs
-            document.getElementById('login-email').value = ''
-            document.getElementById('login-password').value = ''
-        }
-
-        function changeTab(tab) {
-            currentTab = tab
-            renderCurrentTab()
-        }
-
-        function renderCurrentTab() {
-            if (!currentUser) return
-
-            const mailContent = document.getElementById('mail-content')
-            const adminPanel = document.getElementById('admin-panel')
-
-            // Si es admin y está en tab admin
-            if (currentTab === 'admin' && admins.includes(currentUser.email)) {
-                mailContent.classList.add('hidden')
-                adminPanel.classList.remove('hidden')
-                renderAdminPanel()
-                return
-            } else {
-                mailContent.classList.remove('hidden')
-                adminPanel.classList.add('hidden')
-            }
-
-            document.getElementById('tab-title').textContent = {
-                inbox: 'Bandeja de entrada',
-                starred: 'Destacados',
-                sent: 'Enviados',
-                drafts: 'Borradores',
-                trash: 'Papelera'
-            }[currentTab]
-
-            const container = document.getElementById('email-list')
-            container.innerHTML = ''
-
-            const userBox = mailboxes[currentUser.email]
-            let list = []
-
-            if (currentTab === 'inbox') list = userBox.inbox
-            else if (currentTab === 'starred') list = userBox.starred
-            else if (currentTab === 'sent') list = userBox.sent
-            else if (currentTab === 'drafts') list = userBox.drafts
-            else if (currentTab === 'trash') list = userBox.trash
-
-            if (list.length === 0) {
-                container.innerHTML = `<div class="p-12 text-center text-slate-400">No hay correos en esta carpeta</div>`
-                return
-            }
-
-            list.forEach(email => {
-                const verifiedHTML = email.verifiedSender ? 
-                    `<span class="verified-badge inline-flex items-center bg-[#00b4d8] text-white text-[10px] px-2 rounded-full"><i class="fa-solid fa-check mr-0.5"></i> Verificado</span>` : ''
-
-                const row = document.createElement('div')
-                row.className = `email-row flex items-center px-6 py-4 hover:bg-slate-50 cursor-pointer border-b last:border-none`
-                row.innerHTML = `
-                    <input type="checkbox" class="mr-4">
-                    <div class="flex-1 flex items-center">
-                        <div class="w-8 h-8 bg-slate-200 rounded-2xl flex items-center justify-center mr-4">
-                            <i class="fa-solid fa-user text-slate-600"></i>
-                        </div>
-                        <div class="flex-1">
-                            <div class="flex items-center gap-2">
-                                <span class="font-medium">${email.from || email.to}</span>
-                                ${verifiedHTML}
-                            </div>
-                            <div class="text-sm font-medium">${email.subject}</div>
-                            <div class="text-sm text-slate-500 line-clamp-1">${email.body}</div>
-                        </div>
-                        <div class="text-xs text-slate-400 whitespace-nowrap">${email.date}</div>
-                    </div>
-                `
-                // Click para abrir (simulado)
-                row.onclick = () => {
-                    if (currentTab === 'drafts') {
-                        showToast('📝 Abriendo borrador...')
-                        setTimeout(() => composeEmail(email), 400)
-                    } else {
-                        showToast(`📬 Abriendo correo de <strong>${email.from || email.to}</strong>`)
-                    }
-                }
-                container.appendChild(row)
-            })
-        }
-
-        function composeEmail(draft = null) {
-            const modal = document.getElementById('compose-modal')
-            modal.classList.remove('hidden')
-
-            // Si es borrador, precargar
-            if (draft) {
-                document.getElementById('compose-to').value = draft.to || ''
-                document.getElementById('compose-subject').value = draft.subject || ''
-                document.getElementById('compose-body').value = draft.body || ''
-            }
-        }
-
-        function hideCompose() {
-            document.getElementById('compose-modal').classList.add('hidden')
-        }
-
-        function sendEmail() {
-            const to = document.getElementById('compose-to').value.trim()
-            const subject = document.getElementById('compose-subject').value.trim()
-            const body = document.getElementById('compose-body').value.trim()
-
-            if (!to || !subject) {
-                showToast('❌ Completa destinatario y asunto')
-                return
-            }
-
-            // Guardar en enviados del usuario actual
-            const sentEmail = {
-                id: Date.now(),
-                to: to,
-                subject: subject,
-                body: body,
-                date: "ahora",
-                verifiedSender: currentUser.verified
-            }
-            mailboxes[currentUser.email].sent.push(sentEmail)
-
-            // Si el destinatario existe en el sistema, también ponerlo en su inbox
-            if (mailboxes[to]) {
-                mailboxes[to].inbox.unshift({
-                    id: Date.now() + 1,
-                    from: currentUser.email,
-                    subject: subject,
-                    body: body,
-                    date: "ahora",
-                    read: false,
-                    verifiedSender: currentUser.verified
-                })
-            }
-
-            hideCompose()
-            showToast('✅ Correo enviado correctamente')
-            renderCurrentTab()
-        }
-
-        function refreshMail() {
-            showToast('🔄 Actualizando bandeja...')
-            setTimeout(() => renderCurrentTab(), 800)
-        }
-
-        function searchEmails() {
-            const query = document.getElementById('search-input').value.toLowerCase().trim()
-            if (!query) return renderCurrentTab()
-
-            const container = document.getElementById('email-list')
-            container.innerHTML = `<div class="p-8 text-center">Buscando <strong>${query}</strong>...</div>`
-
-            setTimeout(() => {
-                const userBox = mailboxes[currentUser.email]
-                let allEmails = [...userBox.inbox, ...userBox.sent, ...userBox.drafts, ...userBox.trash]
-
-                const filtered = allEmails.filter(e => 
-                    (e.subject && e.subject.toLowerCase().includes(query)) ||
-                    (e.body && e.body.toLowerCase().includes(query)) ||
-                    (e.from && e.from.toLowerCase().includes(query)) ||
-                    (e.to && e.to.toLowerCase().includes(query))
-                )
-
-                if (filtered.length === 0) {
-                    container.innerHTML = `<div class="p-12 text-center text-slate-400">No se encontraron resultados para <strong>${query}</strong></div>`
-                    return
-                }
-
-                // Renderizar resultados
-                container.innerHTML = ''
-                filtered.forEach(email => {
-                    const row = document.createElement('div')
-                    row.className = `email-row flex items-center px-6 py-4 bg-yellow-50`
-                    row.innerHTML = `
-                        <div class="flex-1">
-                            <span class="text-xs text-amber-600">RESULTADO DE BÚSQUEDA</span><br>
-                            <strong>${email.subject}</strong> • ${email.from || email.to}
-                            ${email.verifiedSender ? `<span class="verified-badge ml-2 text-[#00b4d8]"><i class="fa-solid fa-check-circle"></i></span>` : ''}
-                        </div>
-                    `
-                    container.appendChild(row)
-                })
-            }, 600)
-        }
-
-        // ==================== PANEL ADMIN ====================
-
-        function renderAdminPanel() {
-            const tbody = document.getElementById('users-table')
-            tbody.innerHTML = ''
-
-            users.forEach(user => {
-                const isAdmin = admins.includes(user.email)
-                const row = document.createElement('tr')
-                row.className = 'border-b hover:bg-slate-50'
-                row.innerHTML = `
-                    <td class="px-6 py-4 font-medium">${user.name}</td>
-                    <td class="px-6 py-4 text-slate-600">${user.email}</td>
-                    <td class="px-6 py-4 font-mono text-xs text-red-600">${user.password}</td>
-                    <td class="px-6 py-4">
-                        <button onclick="toggleVerified(${user.id});event.stopImmediatePropagation()" 
-                                class="px-4 py-1 rounded-3xl text-xs font-medium flex items-center gap-1 ${user.verified ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-200'}">
-                            <i class="fa-solid fa-check-circle"></i>
-                            ${user.verified ? 'Verificado' : 'Verificar'}
-                        </button>
-                    </td>
-                    <td class="px-6 py-4">
-                        ${user.banned 
-                            ? `<span class="inline-flex items-center bg-red-100 text-red-700 px-3 py-1 rounded-3xl text-xs">BANEADO</span>` 
-                            : `<span class="inline-flex items-center bg-emerald-100 text-emerald-700 px-3 py-1 rounded-3xl text-xs">Activo</span>`}
-                    </td>
-                    <td class="px-6 py-4 flex gap-2">
-                        ${user.banned 
-                            ? `<button onclick="unbanUser(${user.id});event.stopImmediatePropagation()" class="px-5 py-1 text-xs bg-emerald-600 text-white rounded-3xl">Quitar ban</button>`
-                            : `<button onclick="showBanModal(${user.id});event.stopImmediatePropagation()" class="px-5 py-1 text-xs bg-red-600 text-white rounded-3xl">Banear</button>`}
-                        
-                        ${isAdmin ? `<span class="text-xs px-3 py-1 bg-purple-100 text-purple-700 rounded-3xl">Admin</span>` : ''}
-                        
-                        <button onclick="deleteUser(${user.id});event.stopImmediatePropagation()" class="px-4 py-1 text-xs text-slate-400 hover:text-red-600">
-                            <i class="fa-solid fa-trash"></i>
-                        </button>
-                    </td>
-                `
-                tbody.appendChild(row)
-            })
-        }
-
-        function toggleVerified(id) {
-            const user = users.find(u => u.id === id)
-            if (!user) return
-            user.verified = !user.verified
-            showToast(user.verified ? '✅ Usuario verificado (se verá en los correos)' : '❌ Verificación desactivada')
-            renderAdminPanel()
-            // Si estamos en inbox, se actualizará la vista de verificados
-            if (currentTab !== 'admin') renderCurrentTab()
-        }
-
-        let userToBan = null
-
-        function showBanModal(id) {
-            userToBan = users.find(u => u.id === id)
-            if (!userToBan) return
-            document.getElementById('ban-modal').classList.remove('hidden')
-            document.getElementById('ban-reason').focus()
-        }
-
-        function hideBanModal() {
-            document.getElementById('ban-modal').classList.add('hidden')
-            userToBan = null
-        }
-
-        function confirmBan() {
-            const reason = document.getElementById('ban-reason').value.trim()
-            if (!reason) {
-                showToast('❌ Debes escribir un motivo')
-                return
-            }
-            if (!userToBan) return
-
-            userToBan.banned = true
-            userToBan.banReason = reason
-            hideBanModal()
-            showToast(`🚫 ${userToBan.name} ha sido baneado`)
-            renderAdminPanel()
-        }
-
-        function unbanUser(id) {
-            const user = users.find(u => u.id === id)
-            if (!user) return
-            user.banned = false
-            user.banReason = ''
-            showToast(`✅ ${user.name} ha sido desbaneado`)
-            renderAdminPanel()
-        }
-
-        function addAdminByEmail() {
-            const email = prompt('📧 Ingresa el correo electrónico al que quieres dar acceso al Panel Admin:')
-            if (!email) return
-
-            if (admins.includes(email)) {
-                showToast('⚠️ Ese correo ya es administrador')
-                return
-            }
-
-            // Si el usuario no existe, lo creamos
-            if (!users.find(u => u.email === email)) {
-                users.push({
-                    id: Date.now(),
-                    name: "Admin Compartido",
-                    email: email,
-                    password: "temporal123",
-                    verified: true,
-                    banned: false,
-                    banReason: ""
-                })
-                mailboxes[email] = { inbox: [], sent: [], drafts: [], trash: [], starred: [] }
-            }
-
-            admins.push(email)
-            showToast(`✅ ${email} ahora tiene acceso al Panel Admin`)
-            renderAdminPanel()
-        }
-
-        function showMassMessageModal() {
-            document.getElementById('mass-modal').classList.remove('hidden')
-        }
-
-        function hideMassModal() {
-            document.getElementById('mass-modal').classList.add('hidden')
-        }
-
-        function sendMassMessage() {
-            const msg = document.getElementById('mass-text').value.trim()
-            if (!msg) return
-
-            globalBannerMessage = msg
-            hideMassModal()
-            showToast('📢 Mensaje global enviado a todos los usuarios')
-            
-            // Simular que todos los usuarios lo ven al iniciar
-            if (currentUser) {
-                showToast(`📨 Todos los usuarios verán: <strong>${msg.substring(0, 30)}...</strong>`)
-            }
-        }
-
-        function exportUserData() {
-            let csv = "Nombre,Correo,Verificado,Baneado,MotivoBan,Contraseña\n"
-            users.forEach(u => {
-                csv += `${u.name},${u.email},${u.verified},${u.banned},${u.banReason || 'Ninguno'},${u.password}\n`
-            })
-            const blob = new Blob([csv], { type: 'text/csv' })
-            const url = URL.createObjectURL(blob)
-            const a = document.createElement('a')
-            a.href = url
-            a.download = 'usuarios_novamail.csv'
-            a.click()
-            showToast('📤 Datos exportados (CSV)')
-        }
-
-        function deleteUser(id) {
-            if (!confirm('¿Eliminar usuario permanentemente?')) return
-            users = users.filter(u => u.id !== id)
-            renderAdminPanel()
-            showToast('🗑️ Usuario eliminado')
-        }
-
-        function showAccountMenu() {
-            const options = `
-                <div class="absolute top-16 right-6 bg-white shadow-2xl rounded-3xl py-2 w-72 text-sm z-50">
-                    <div onclick="logout()" class="px-6 py-4 hover:bg-slate-100 cursor-pointer flex items-center gap-3">
-                        <i class="fa-solid fa-sign-out-alt"></i> Cerrar sesión
-                    </div>
-                    <div class="px-6 py-4 hover:bg-slate-100 cursor-pointer">Mi cuenta</div>
-                    <div class="px-6 py-4 hover:bg-slate-100 cursor-pointer">Configuración</div>
-                    <div class="px-6 py-4 hover:bg-slate-100 cursor-pointer border-t">Ayuda y comentarios</div>
-                </div>
-            `
-            const menu = document.createElement('div')
-            menu.innerHTML = options
-            document.body.appendChild(menu.firstElementChild)
-            setTimeout(() => document.addEventListener('click', removeMenu, {once: true}), 10)
-            
-            function removeMenu() {
-                const m = document.querySelector('.shadow-2xl')
-                if (m) m.remove()
-            }
-        }
-
-        function showForgotModal() {
-            document.getElementById('forgot-modal').classList.remove('hidden')
-        }
-
-        function hideForgotModal() {
-            document.getElementById('forgot-modal').classList.add('hidden')
-        }
-
-        function fakeRecoverPassword() {
-            hideForgotModal()
-            showToast('📧 Enlace de recuperación enviado (demo)')
-        }
-
-        // Toggle sidebar en móviles (opcional)
-        function toggleSidebar() {
-            const sidebar = document.querySelector('#sidebar')
-            sidebar.style.transform = sidebar.style.transform === 'translateX(-100%)' ? 'translateX(0)' : 'translateX(-100%)'
-        }
-
-        // ==================== INICIO ====================
-        console.log('%c🚀 NovaMail clon listo - Todo funciona: papelera, borradores, admin, verificados, ban, etc.', 'color:#00b4d8;font-weight:bold')
-    </script>
+  </div>`);
+  document.getElementById('confirm-ban-btn').onclick=()=>{
+    const reason=document.getElementById('ban-reason-input').value.trim();
+    const msg=document.getElementById('ban-msg-input').value.trim();
+    if(!reason){showToast('⚠️ El motivo es obligatorio');return;}
+    const arr=DB.users; const i=arr.findIndex(u=>u.id===user.id);
+    if(i>-1){ arr[i].banned=true; arr[i].banReason=reason; DB.users=arr; }
+    closeModal();
+    showToast(`🚫 ${user.name} ha sido baneado`);
+    renderAdmContent();
+  };
+}
+
+// ══════════════════════════════════
+// REAL-TIME SIMULATION
+// ══════════════════════════════════
+setInterval(()=>{
+  if(!CU||CU._viewAdmin) return;
+  const newUnread=DB.emails.filter(e=>e.to===CU.email&&e.folder==='inbox'&&!e.read);
+  if(newUnread.length>0){
+    const count=document.getElementById('inbox-count');
+    if(count) count.textContent=newUnread.length||'';
+  }
+},4000);
+
+// ══════════════════════════════════
+// START
+// ══════════════════════════════════
+showScreen('auth-screen');
+</script>
 </body>
 </html>
