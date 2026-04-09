@@ -3,872 +3,583 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ZMail — Tu correo inteligente</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<title>ZMail</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400&display=swap" rel="stylesheet">
 <style>
-:root {
-  --z-blue: #1a6cf6;
-  --z-blue-dark: #1250c4;
-  --z-blue-light: #e8f0fe;
-  --z-red: #e53935;
-  --z-green: #1e8e3e;
-  --z-yellow: #f9ab00;
-  --z-purple: #7c4dff;
-  --bg: #f0f4f9;
-  --surface: #ffffff;
-  --surface2: #f8fafd;
-  --border: #dde3ea;
-  --text: #1a1c1e;
-  --text2: #444746;
-  --text3: #747775;
-  --sidebar-w: 256px;
-  --topbar-h: 64px;
-  --shadow: 0 1px 4px rgba(0,0,0,.08), 0 2px 12px rgba(0,0,0,.04);
-  --shadow-lg: 0 4px 24px rgba(0,0,0,.12), 0 1px 6px rgba(0,0,0,.06);
-  --radius: 12px;
-  --radius-sm: 8px;
-  --radius-full: 100px;
+:root{
+  --blue:#1a6cf6;--blue-d:#1250c4;--blue-l:#e8f0fe;
+  --red:#e53935;--green:#1e8e3e;--yellow:#f9ab00;--purple:#7c4dff;
+  --bg:#f0f4f9;--sur:#fff;--sur2:#f8fafd;
+  --bdr:#dde3ea;--txt:#1a1c1e;--txt2:#444746;--txt3:#747775;
+  --sh:0 1px 4px rgba(0,0,0,.08),0 2px 12px rgba(0,0,0,.04);
+  --sh-lg:0 4px 24px rgba(0,0,0,.12),0 1px 6px rgba(0,0,0,.06);
+  --r:12px;--rs:8px;--rf:100px;
 }
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html, body { height: 100%; font-family: 'DM Sans', sans-serif; font-size: 14px; color: var(--text); background: var(--bg); }
-a { color: inherit; text-decoration: none; }
-button { font-family: inherit; cursor: pointer; border: none; outline: none; }
-input, textarea, select { font-family: inherit; outline: none; border: none; }
-.hidden { display: none !important; }
-::-webkit-scrollbar { width: 6px; height: 6px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: #c8cacd; border-radius: 3px; }
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;font-family:'DM Sans',sans-serif;font-size:14px;color:var(--txt);background:var(--bg)}
+button{font-family:inherit;cursor:pointer;border:none;outline:none}
+input,textarea,select{font-family:inherit;outline:none;border:none}
+.hidden{display:none!important}
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-thumb{background:#c8cacd;border-radius:3px}
 
-/* ───── AUTH ───── */
-#auth-screen {
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  background: linear-gradient(135deg, #e8f0fe 0%, #fff 50%, #fce8e6 100%);
-  padding: 24px;
-}
-.auth-logo-wrap { display: flex; align-items: center; gap: 10px; margin-bottom: 32px; }
-.auth-logo-icon { width: 44px; height: 44px; }
-.auth-logo-name { font-size: 30px; font-weight: 300; letter-spacing: -1px; color: #3c4043; }
-.auth-logo-name b { color: var(--z-blue); font-weight: 600; }
-.auth-card {
-  background: var(--surface);
-  border-radius: 20px;
-  padding: 48px 44px 40px;
-  width: 100%;
-  max-width: 460px;
-  box-shadow: var(--shadow-lg);
-}
-.auth-card h2 { font-size: 26px; font-weight: 400; margin-bottom: 8px; }
-.auth-subtitle { color: var(--text3); margin-bottom: 28px; font-size: 15px; }
-.auth-msg { padding: 11px 14px; border-radius: var(--radius-sm); font-size: 13px; margin-bottom: 14px; }
-.auth-msg.error { background: #fce8e6; color: #c62828; }
-.auth-msg.success { background: #e6f4ea; color: #1b5e20; }
-.field-group { margin-bottom: 16px; }
-.field-group label { display: block; font-size: 12px; font-weight: 500; color: var(--text2); margin-bottom: 6px; letter-spacing: .4px; text-transform: uppercase; }
-.field-group input {
-  width: 100%;
-  padding: 13px 16px;
-  border: 1.5px solid var(--border);
-  border-radius: var(--radius-sm);
-  font-size: 15px;
-  transition: border-color .2s, box-shadow .2s;
-  background: #fafafa;
-}
-.field-group input:focus { border-color: var(--z-blue); box-shadow: 0 0 0 3px rgba(26,108,246,.12); background: #fff; }
-.btn-primary {
-  width: 100%;
-  background: var(--z-blue);
-  color: #fff;
-  border-radius: var(--radius-sm);
-  padding: 13px;
-  font-size: 15px;
-  font-weight: 500;
-  transition: background .2s, transform .1s;
-  margin-top: 4px;
-}
-.btn-primary:hover { background: var(--z-blue-dark); }
-.btn-primary:active { transform: scale(.99); }
-.auth-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 20px; }
-.link { color: var(--z-blue); font-size: 14px; cursor: pointer; }
-.link:hover { text-decoration: underline; }
+/* ── AUTH ── */
+#auth-page{min-height:100vh;display:flex;gap:0;background:#fff}
+.auth-left{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px;background:#fff}
+.auth-right{width:420px;background:linear-gradient(160deg,#1a1a2e 0%,#16213e 60%,#0f3460 100%);display:flex;flex-direction:column;overflow:hidden;flex-shrink:0}
+.auth-logo-wrap{display:flex;align-items:center;gap:10px;margin-bottom:36px}
+.auth-logo-name{font-size:28px;font-weight:300;color:#3c4043}
+.auth-logo-name b{color:var(--blue);font-weight:600}
+.auth-card{width:100%;max-width:420px}
+.auth-card h2{font-size:26px;font-weight:400;margin-bottom:6px}
+.auth-sub{color:var(--txt3);margin-bottom:28px;font-size:15px}
+.auth-msg{padding:11px 14px;border-radius:var(--rs);font-size:13px;margin-bottom:14px}
+.auth-msg.error{background:#fce8e6;color:#c62828}
+.auth-msg.success{background:#e6f4ea;color:#1b5e20}
+.fg{margin-bottom:16px}
+.fg label{display:block;font-size:11px;font-weight:600;color:var(--txt2);margin-bottom:5px;letter-spacing:.5px;text-transform:uppercase}
+.fg input{width:100%;padding:13px 16px;border:1.5px solid var(--bdr);border-radius:var(--rs);font-size:15px;transition:border-color .2s,box-shadow .2s;background:#fafafa}
+.fg input:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(26,108,246,.12);background:#fff}
+.btn-pri{width:100%;background:var(--blue);color:#fff;border-radius:var(--rs);padding:13px;font-size:15px;font-weight:500;transition:background .2s,transform .1s;margin-top:4px}
+.btn-pri:hover{background:var(--blue-d)}
+.btn-pri:active{transform:scale(.99)}
+.auth-foot{display:flex;justify-content:space-between;align-items:center;margin-top:20px}
+.lnk{color:var(--blue);font-size:14px;cursor:pointer}
+.lnk:hover{text-decoration:underline}
 
-/* ───── BANNED / SYSDOWN ───── */
-.overlay-screen {
-  min-height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 24px;
-  background: var(--bg);
-}
-.overlay-card {
-  background: var(--surface);
-  border-radius: 20px;
-  padding: 48px 44px;
-  max-width: 500px;
-  width: 100%;
-  text-align: center;
-  box-shadow: var(--shadow-lg);
-}
-.overlay-icon { font-size: 56px; margin-bottom: 20px; }
-.overlay-card h2 { font-size: 24px; font-weight: 500; margin-bottom: 12px; }
-.overlay-card p { color: var(--text2); line-height: 1.6; }
-.ban-reason-box {
-  background: #fce8e6;
-  border-left: 3px solid var(--z-red);
-  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
-  padding: 12px 16px;
-  margin: 16px 0;
-  text-align: left;
-  font-style: italic;
-  color: #b71c1c;
-  font-size: 14px;
-}
+/* ── NEWS PANEL (auth right) ── */
+.news-header{padding:24px 20px 16px;border-bottom:1px solid rgba(255,255,255,.1)}
+.news-header-title{font-size:13px;font-weight:600;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:1px}
+.news-header-brand{font-size:20px;font-weight:600;color:#a78bfa;margin-top:4px}
+.news-scroll{flex:1;overflow-y:auto;padding:16px}
+.news-scroll::-webkit-scrollbar{width:4px}
+.news-scroll::-webkit-scrollbar-thumb{background:rgba(255,255,255,.15);border-radius:2px}
+.news-item{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:var(--r);margin-bottom:14px;overflow:hidden;transition:background .15s}
+.news-item:hover{background:rgba(255,255,255,.1)}
+.news-item-img{width:100%;height:140px;object-fit:cover;display:block}
+.news-item-img-placeholder{width:100%;height:100px;background:linear-gradient(135deg,rgba(167,139,250,.3),rgba(26,108,246,.3));display:flex;align-items:center;justify-content:center;font-size:32px}
+.news-item-body{padding:12px}
+.news-item-cat{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:#a78bfa;margin-bottom:5px}
+.news-item-title{font-size:14px;font-weight:600;color:#fff;line-height:1.4;margin-bottom:5px}
+.news-item-text{font-size:12px;color:rgba(255,255,255,.6);line-height:1.5}
+.news-item-date{font-size:11px;color:rgba(255,255,255,.35);margin-top:8px}
+.news-empty{text-align:center;padding:40px 20px;color:rgba(255,255,255,.3);font-size:13px}
 
-/* ───── SYSDOWN BANNER ───── */
-.sysdown-banner {
-  background: #b71c1c;
-  color: #fff;
-  text-align: center;
-  padding: 9px 16px;
-  font-size: 13px;
-  font-weight: 500;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  position: fixed;
-  top: 0; left: 0; right: 0;
-  z-index: 9999;
-}
+/* ── BAN ALERT ── */
+#ban-overlay{position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,.9);display:flex;align-items:center;justify-content:center;animation:fadeIn .3s}
+.ban-card{background:#fff;border-radius:24px;padding:52px 48px;max-width:540px;width:90%;text-align:center;box-shadow:0 20px 60px rgba(229,57,53,.45);animation:banPop .45s cubic-bezier(.34,1.56,.64,1)}
+@keyframes banPop{from{transform:scale(.5);opacity:0}to{transform:scale(1);opacity:1}}
+.ban-icon{font-size:80px;display:block;margin-bottom:20px;animation:shake .6s .3s both}
+@keyframes shake{0%,100%{transform:rotate(0)}15%{transform:rotate(-12deg)}30%{transform:rotate(12deg)}45%{transform:rotate(-9deg)}60%{transform:rotate(9deg)}75%{transform:rotate(-5deg)}90%{transform:rotate(5deg)}}
+.ban-title{font-size:30px;font-weight:700;color:var(--red);margin-bottom:8px}
+.ban-sub{font-size:15px;color:var(--txt2);margin-bottom:22px}
+.ban-reason-box{background:#fce8e6;border:2px solid #ef9a9a;border-radius:var(--r);padding:18px 22px;margin-bottom:28px;text-align:left}
+.ban-reason-lbl{font-size:11px;font-weight:700;color:#c62828;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
+.ban-reason-txt{font-size:16px;font-style:italic;color:#b71c1c;line-height:1.5}
+.ban-btn{background:var(--red);color:#fff;border-radius:var(--rf);padding:14px 40px;font-size:15px;font-weight:600}
+.ban-btn:hover{background:#c62828}
 
-/* ───── MAIN APP ───── */
-#app-screen { display: flex; flex-direction: column; height: 100vh; }
-.has-sysdown { padding-top: 38px; }
+/* ── BANNERS ── */
+.sysdown-banner{background:#b71c1c;color:#fff;text-align:center;padding:9px 16px;font-size:13px;font-weight:500;display:flex;align-items:center;justify-content:center;gap:8px;position:fixed;top:0;left:0;right:0;z-index:9999}
+.announce-banner{background:linear-gradient(90deg,var(--blue),var(--purple));color:#fff;padding:10px 20px;font-size:14px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.close-btn-sm{background:rgba(255,255,255,.2);border:none;color:#fff;border-radius:20px;padding:4px 12px;cursor:pointer;font-size:13px}
 
-.topbar {
-  height: var(--topbar-h);
-  display: flex;
-  align-items: center;
-  padding: 0 12px;
-  gap: 8px;
-  background: var(--bg);
-  position: sticky;
-  top: 0;
-  z-index: 100;
-  flex-shrink: 0;
-}
-.topbar-logo {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  min-width: 230px;
-  cursor: pointer;
-  padding: 8px;
-  border-radius: var(--radius-sm);
-  transition: background .15s;
-}
-.topbar-logo:hover { background: rgba(0,0,0,.04); }
-.topbar-logo svg { width: 30px; height: 30px; }
-.topbar-logo-text { font-size: 22px; font-weight: 300; letter-spacing: -.5px; color: var(--text3); }
-.topbar-logo-text b { color: var(--z-blue); font-weight: 600; }
-.search-wrap {
-  flex: 1;
-  max-width: 740px;
-  background: #e9eef6;
-  border-radius: var(--radius-full);
-  display: flex;
-  align-items: center;
-  padding: 0 16px;
-  gap: 10px;
-  height: 46px;
-  transition: background .2s, box-shadow .2s;
-}
-.search-wrap:focus-within { background: var(--surface); box-shadow: 0 2px 8px rgba(0,0,0,.12); }
-.search-wrap input { flex: 1; background: none; font-size: 15px; color: var(--text); }
-.search-icon { color: var(--text3); font-size: 18px; }
-.topbar-actions { display: flex; align-items: center; gap: 8px; margin-left: auto; }
-.live-indicator { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text3); }
-.live-dot { width: 7px; height: 7px; border-radius: 50%; background: #34a853; animation: pulse 1.8s infinite; }
-@keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.5;transform:scale(.85)} }
-.avatar-wrap { position: relative; }
-.avatar-btn {
-  width: 38px; height: 38px;
-  border-radius: 50%;
-  color: #fff;
-  font-size: 15px;
-  font-weight: 600;
-  display: flex; align-items: center; justify-content: center;
-  overflow: hidden;
-  cursor: pointer;
-  transition: opacity .15s;
-}
-.avatar-btn:hover { opacity: .88; }
-.avatar-btn img { width: 100%; height: 100%; object-fit: cover; }
-.topbar-icon-btn {
-  width: 40px; height: 40px;
-  border-radius: 50%;
-  background: none;
-  color: var(--text2);
-  font-size: 19px;
-  display: flex; align-items: center; justify-content: center;
-  transition: background .15s;
-}
-.topbar-icon-btn:hover { background: rgba(0,0,0,.06); }
+/* ── SYSDOWN SCREEN ── */
+.overlay-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;background:var(--bg)}
+.overlay-card{background:var(--sur);border-radius:20px;padding:48px 44px;max-width:500px;width:100%;text-align:center;box-shadow:var(--sh-lg)}
 
-/* ───── PROFILE DROPDOWN ───── */
-.profile-dd {
-  position: absolute;
-  top: 48px; right: 0;
-  background: var(--surface);
-  border-radius: 16px;
-  box-shadow: 0 6px 32px rgba(0,0,0,.16);
-  min-width: 300px;
-  z-index: 500;
-  overflow: hidden;
-}
-.profile-dd-header { padding: 24px; text-align: center; border-bottom: 1px solid var(--border); }
-.profile-pic-wrap {
-  width: 68px; height: 68px;
-  border-radius: 50%;
-  margin: 0 auto 12px;
-  position: relative;
-  cursor: pointer;
-  overflow: hidden;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 24px; font-weight: 600; color: #fff;
-}
-.profile-pic-wrap img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
-.pic-overlay {
-  position: absolute; inset: 0;
-  background: rgba(0,0,0,.45);
-  display: none;
-  align-items: center;
-  justify-content: center;
-  font-size: 11px;
-  color: #fff;
-  border-radius: 50%;
-  text-align: center;
-  line-height: 1.3;
-}
-.profile-pic-wrap:hover .pic-overlay { display: flex; }
-.profile-dd-name { font-size: 16px; font-weight: 500; }
-.profile-dd-email { font-size: 13px; color: var(--text3); margin-top: 2px; }
-.verified-badge { display: inline-flex; align-items: center; gap: 4px; background: var(--z-blue-light); color: var(--z-blue); padding: 3px 10px; border-radius: var(--radius-full); font-size: 12px; font-weight: 500; margin-top: 8px; }
-.dd-item { padding: 11px 18px; cursor: pointer; display: flex; align-items: center; gap: 10px; font-size: 14px; transition: background .12s; }
-.dd-item:hover { background: var(--surface2); }
-input[type=file] { display: none; }
+/* ── MAIN APP ── */
+#app-screen{display:flex;flex-direction:column;height:100vh}
+.topbar{height:64px;display:flex;align-items:center;padding:0 12px;gap:8px;background:var(--bg);position:sticky;top:0;z-index:100;flex-shrink:0}
+.topbar-logo{display:flex;align-items:center;gap:6px;min-width:230px;cursor:pointer;padding:8px;border-radius:var(--rs);transition:background .15s}
+.topbar-logo:hover{background:rgba(0,0,0,.04)}
+.tl-text{font-size:22px;font-weight:300;color:var(--txt3)}
+.tl-text b{color:var(--blue);font-weight:600}
+.search-wrap{flex:1;max-width:740px;background:#e9eef6;border-radius:var(--rf);display:flex;align-items:center;padding:0 16px;gap:10px;height:46px;transition:background .2s,box-shadow .2s}
+.search-wrap:focus-within{background:var(--sur);box-shadow:0 2px 8px rgba(0,0,0,.12)}
+.search-wrap input{flex:1;background:none;font-size:15px;color:var(--txt)}
+.tbar-right{display:flex;align-items:center;gap:8px;margin-left:auto}
+.live-ind{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--txt3)}
+.live-dot{width:7px;height:7px;border-radius:50%;background:#34a853;animation:pulse 1.8s infinite}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(.85)}}
+.icon-btn-tbar{width:40px;height:40px;border-radius:50%;background:none;color:var(--txt2);font-size:19px;display:flex;align-items:center;justify-content:center;transition:background .15s;position:relative}
+.icon-btn-tbar:hover{background:rgba(0,0,0,.06)}
+.notif-dot{position:absolute;top:-1px;right:-1px;width:9px;height:9px;border-radius:50%;background:var(--red);border:2px solid var(--bg)}
+.ava-btn{width:38px;height:38px;border-radius:50%;color:#fff;font-size:15px;font-weight:600;display:flex;align-items:center;justify-content:center;overflow:hidden;cursor:pointer;transition:opacity .15s}
+.ava-btn:hover{opacity:.88}
+.ava-btn img{width:100%;height:100%;object-fit:cover}
 
-/* ───── BODY ───── */
-.body-wrap { display: flex; flex: 1; overflow: hidden; }
+/* ── PROFILE DROPDOWN ── */
+.ava-wrap{position:relative}
+.profile-dd{position:absolute;top:48px;right:0;background:var(--sur);border-radius:16px;box-shadow:0 6px 32px rgba(0,0,0,.16);min-width:300px;z-index:500;overflow:hidden}
+.pdd-header{padding:24px;text-align:center;border-bottom:1px solid var(--bdr)}
+.pfp-wrap{width:68px;height:68px;border-radius:50%;margin:0 auto 12px;position:relative;cursor:pointer;overflow:hidden;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:600;color:#fff}
+.pfp-wrap img{width:100%;height:100%;object-fit:cover;border-radius:50%}
+.pfp-hover{position:absolute;inset:0;background:rgba(0,0,0,.45);display:none;align-items:center;justify-content:center;font-size:11px;color:#fff;border-radius:50%;text-align:center;line-height:1.3}
+.pfp-wrap:hover .pfp-hover{display:flex}
+.pdd-name{font-size:16px;font-weight:500}
+.pdd-email{font-size:13px;color:var(--txt3);margin-top:2px}
+.pdd-vbadge{display:inline-flex;align-items:center;gap:5px;background:var(--blue-l);color:var(--blue);padding:4px 12px;border-radius:var(--rf);font-size:12px;font-weight:600;margin-top:8px}
+.dd-row{padding:11px 18px;cursor:pointer;display:flex;align-items:center;gap:10px;font-size:14px;transition:background .12s}
+.dd-row:hover{background:var(--sur2)}
+input[type=file]{display:none}
 
-/* ───── SIDEBAR ───── */
-.sidebar {
-  width: var(--sidebar-w);
-  padding: 8px 12px;
-  flex-shrink: 0;
-  overflow-y: auto;
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-.compose-btn {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  background: #c2e7ff;
-  border-radius: var(--radius-full);
-  padding: 16px 24px;
-  font-size: 14px;
-  font-weight: 500;
-  margin-bottom: 6px;
-  width: 100%;
-  transition: background .15s, box-shadow .15s;
-}
-.compose-btn:hover { background: #a8d8f8; box-shadow: var(--shadow); }
-.compose-btn svg { width: 20px; height: 20px; }
-.nav-item {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 6px 12px;
-  border-radius: var(--radius-full);
-  cursor: pointer;
-  font-size: 14px;
-  color: var(--text2);
-  transition: background .12s;
-  height: 36px;
-  white-space: nowrap;
-  overflow: hidden;
-}
-.nav-item:hover { background: rgba(0,0,0,.06); }
-.nav-item.active { background: #d3e3fd; color: var(--text); font-weight: 500; }
-.nav-item .nav-icon { font-size: 17px; width: 20px; text-align: center; flex-shrink: 0; }
-.nav-count { margin-left: auto; font-size: 12px; font-weight: 500; color: var(--text2); }
-.nav-sep { height: 1px; background: var(--border); margin: 8px 4px; }
+/* ── SIDEBAR ── */
+.body-wrap{display:flex;flex:1;overflow:hidden}
+.sidebar{width:256px;padding:8px 12px;flex-shrink:0;overflow-y:auto;display:flex;flex-direction:column;gap:2px}
+.compose-btn{display:flex;align-items:center;gap:10px;background:#c2e7ff;border-radius:var(--rf);padding:16px 24px;font-size:14px;font-weight:500;margin-bottom:6px;width:100%;transition:background .15s,box-shadow .15s}
+.compose-btn:hover{background:#a8d8f8;box-shadow:var(--sh)}
+.nav-item{display:flex;align-items:center;gap:12px;padding:6px 12px;border-radius:var(--rf);cursor:pointer;font-size:14px;color:var(--txt2);transition:background .12s;height:36px;white-space:nowrap;overflow:hidden}
+.nav-item:hover{background:rgba(0,0,0,.06)}
+.nav-item.active{background:#d3e3fd;color:var(--txt);font-weight:500}
+.nav-icon{font-size:17px;width:20px;text-align:center;flex-shrink:0}
+.nav-count{margin-left:auto;font-size:12px;font-weight:500}
+.nav-sep{height:1px;background:var(--bdr);margin:8px 4px}
 
-/* ───── EMAIL LIST ───── */
-.email-list-pane { flex: 1; overflow-y: auto; display: flex; flex-direction: column; min-width: 0; }
-.list-header {
-  display: flex;
-  align-items: center;
-  padding: 12px 20px;
-  border-bottom: 1px solid var(--border);
-  gap: 10px;
-  position: sticky;
-  top: 0;
-  background: var(--bg);
-  z-index: 10;
-}
-.list-title { font-size: 16px; font-weight: 500; }
-.list-count { font-size: 13px; color: var(--text3); }
-.email-row {
-  display: flex;
-  align-items: center;
-  padding: 0 16px;
-  height: 56px;
-  border-bottom: 1px solid #f1f3f4;
-  cursor: pointer;
-  transition: background .1s;
-  gap: 10px;
-  min-width: 0;
-}
-.email-row:hover { background: #f0f3f8; }
-.email-row.selected { background: #d3e3fd; }
-.email-row.unread { background: var(--surface); font-weight: 600; }
-.email-row.unread:hover { background: #f0f3f8; }
-.email-avatar-sm {
-  width: 38px; height: 38px;
-  border-radius: 50%;
-  flex-shrink: 0;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 13px; font-weight: 600; color: #fff;
-  overflow: hidden;
-}
-.email-avatar-sm img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
-.email-info { flex: 1; min-width: 0; overflow: hidden; }
-.email-sender-row { display: flex; align-items: center; gap: 5px; }
-.email-sender-name { font-size: 13.5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 160px; }
-.email-subject-line { font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--text2); }
-.email-preview-text { font-weight: 400; color: var(--text3); }
-.email-date-col { font-size: 12px; color: var(--text3); flex-shrink: 0; min-width: 50px; text-align: right; }
-.star-icon { font-size: 16px; cursor: pointer; flex-shrink: 0; padding: 4px; }
-.imp-icon { font-size: 14px; }
-.verify-row-badge { font-size: 11px; color: var(--z-blue); font-weight: 600; }
-.empty-state { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--text3); padding: 60px 20px; }
-.empty-icon { font-size: 56px; margin-bottom: 16px; }
-.empty-text { font-size: 16px; }
+/* ── EMAIL LIST ── */
+.email-list-pane{flex:1;overflow-y:auto;display:flex;flex-direction:column;min-width:0}
+.list-header{display:flex;align-items:center;padding:12px 20px;border-bottom:1px solid var(--bdr);gap:10px;position:sticky;top:0;background:var(--bg);z-index:10}
+.list-title{font-size:16px;font-weight:500}
+.list-count{font-size:13px;color:var(--txt3)}
+.email-row{display:flex;align-items:center;padding:0 16px;height:56px;border-bottom:1px solid #f1f3f4;cursor:pointer;transition:background .1s;gap:10px;min-width:0}
+.email-row:hover{background:#f0f3f8}
+.email-row.selected{background:#d3e3fd}
+.email-row.unread{background:var(--sur);font-weight:600}
+.email-row.unread:hover{background:#f0f3f8}
+.ava-sm{width:38px;height:38px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;color:#fff;overflow:hidden}
+.ava-sm img{width:100%;height:100%;object-fit:cover;border-radius:50%}
+.einfo{flex:1;min-width:0;overflow:hidden}
+.esender-row{display:flex;align-items:center;gap:4px}
+.esender{font-size:13.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:150px}
+.esubj{font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--txt2)}
+.eprev{font-weight:400;color:var(--txt3)}
+.edate{font-size:12px;color:var(--txt3);flex-shrink:0;min-width:50px;text-align:right}
+.star-btn{font-size:16px;cursor:pointer;flex-shrink:0;padding:4px}
+.empty-state{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--txt3);padding:60px 20px;text-align:center}
+.empty-icon{font-size:56px;margin-bottom:16px}
+.empty-text{font-size:16px}
 
-/* ───── EMAIL VIEWER ───── */
-.email-viewer { flex: 1; overflow-y: auto; padding: 24px 36px; background: var(--bg); }
-.viewer-toolbar { display: flex; align-items: center; gap: 6px; margin-bottom: 20px; }
-.tool-btn {
-  width: 38px; height: 38px;
-  border-radius: 50%;
-  background: none;
-  font-size: 18px;
-  color: var(--text2);
-  display: flex; align-items: center; justify-content: center;
-  transition: background .12s;
-}
-.tool-btn:hover { background: rgba(0,0,0,.07); }
-.viewer-subject { font-size: 24px; font-weight: 400; margin-bottom: 16px; line-height: 1.3; }
-.viewer-meta { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 20px; }
-.viewer-avatar {
-  width: 42px; height: 42px;
-  border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 16px; font-weight: 600; color: #fff;
-  flex-shrink: 0;
-  overflow: hidden;
-}
-.viewer-avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
-.viewer-from-name { font-size: 14px; font-weight: 500; display: flex; align-items: center; gap: 6px; }
-.viewer-from-detail { font-size: 12px; color: var(--text3); margin-top: 2px; }
-.viewer-body { background: var(--surface); border-radius: var(--radius); padding: 28px; line-height: 1.7; font-size: 14px; box-shadow: var(--shadow); }
-.reply-section { margin-top: 16px; display: flex; gap: 8px; }
-.reply-btn-pill {
-  border: 1.5px solid var(--border);
-  border-radius: var(--radius-full);
-  padding: 8px 20px;
-  font-size: 14px;
-  font-weight: 500;
-  background: var(--surface);
-  display: flex; align-items: center; gap: 6px;
-  transition: background .12s, border-color .12s;
-}
-.reply-btn-pill:hover { background: var(--surface2); border-color: #b0b7bf; }
+/* ── EMAIL VIEWER ── */
+.email-viewer{flex:1;overflow-y:auto;padding:24px 36px;background:var(--bg)}
+.viewer-toolbar{display:flex;align-items:center;gap:6px;margin-bottom:20px}
+.tool-btn{width:38px;height:38px;border-radius:50%;background:none;font-size:18px;color:var(--txt2);display:flex;align-items:center;justify-content:center;transition:background .12s}
+.tool-btn:hover{background:rgba(0,0,0,.07)}
+.viewer-subject{font-size:24px;font-weight:400;margin-bottom:16px;line-height:1.3}
+.viewer-meta{display:flex;align-items:flex-start;gap:12px;margin-bottom:20px}
+.viewer-ava{width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:600;color:#fff;flex-shrink:0;overflow:hidden}
+.viewer-ava img{width:100%;height:100%;object-fit:cover;border-radius:50%}
+.viewer-from-name{font-size:14px;font-weight:500;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.viewer-detail{font-size:12px;color:var(--txt3);margin-top:2px}
+.viewer-body{background:var(--sur);border-radius:var(--r);padding:28px;line-height:1.7;font-size:14px;box-shadow:var(--sh)}
+.reply-section{margin-top:16px;display:flex;gap:8px;flex-wrap:wrap}
+.reply-pill{border:1.5px solid var(--bdr);border-radius:var(--rf);padding:8px 20px;font-size:14px;font-weight:500;background:var(--sur);display:flex;align-items:center;gap:6px;transition:background .12s,border-color .12s}
+.reply-pill:hover{background:var(--sur2);border-color:#b0b7bf}
 
-/* ───── COMPOSE ───── */
-.compose-modal {
-  position: fixed;
-  bottom: 0;
-  right: 20px;
-  width: 580px;
-  background: var(--surface);
-  border-radius: 12px 12px 0 0;
-  box-shadow: 0 -2px 24px rgba(0,0,0,.16), 0 0 0 1px rgba(0,0,0,.06);
-  z-index: 1000;
-  display: flex;
-  flex-direction: column;
-}
-.compose-header {
-  background: #333;
-  color: #fff;
-  padding: 11px 18px;
-  border-radius: 12px 12px 0 0;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  cursor: move;
-}
-.compose-header-title { font-size: 14px; font-weight: 500; }
-.compose-close { background: none; color: #ccc; font-size: 20px; transition: color .1s; }
-.compose-close:hover { color: #fff; }
-.compose-field { border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 8px; padding: 8px 16px; }
-.compose-label { font-size: 12px; color: var(--text3); width: 40px; flex-shrink: 0; }
-.compose-field input { flex: 1; font-size: 14px; background: none; }
-.compose-body { padding: 12px 16px; }
-.compose-body textarea { width: 100%; border: none; resize: none; font-size: 14px; min-height: 200px; background: none; color: var(--text); }
-.compose-footer { padding: 8px 14px; border-top: 1px solid var(--border); display: flex; align-items: center; gap: 8px; }
-.send-btn { background: var(--z-blue); color: #fff; border-radius: var(--radius-full); padding: 9px 22px; font-size: 14px; font-weight: 500; transition: background .15s; }
-.send-btn:hover { background: var(--z-blue-dark); }
-.compose-icon-btn { width: 36px; height: 36px; border-radius: 50%; background: none; color: var(--text2); font-size: 17px; display: flex; align-items: center; justify-content: center; transition: background .12s; }
-.compose-icon-btn:hover { background: var(--surface2); }
+/* ── COMPOSE ── */
+.compose-modal{position:fixed;bottom:0;right:20px;width:580px;background:var(--sur);border-radius:12px 12px 0 0;box-shadow:0 -2px 24px rgba(0,0,0,.16),0 0 0 1px rgba(0,0,0,.06);z-index:1000;display:flex;flex-direction:column}
+.compose-hdr{background:#333;color:#fff;padding:11px 18px;border-radius:12px 12px 0 0;display:flex;justify-content:space-between;align-items:center}
+.compose-close{background:none;color:#ccc;font-size:20px;transition:color .1s}
+.compose-close:hover{color:#fff}
+.cfield{border-bottom:1px solid var(--bdr);display:flex;align-items:center;gap:8px;padding:8px 16px}
+.clabel{font-size:12px;color:var(--txt3);width:40px;flex-shrink:0}
+.cfield input{flex:1;font-size:14px;background:none}
+.cbody{padding:12px 16px}
+.cbody textarea{width:100%;border:none;resize:none;font-size:14px;min-height:200px;background:none;color:var(--txt)}
+.cfoot{padding:8px 14px;border-top:1px solid var(--bdr);display:flex;align-items:center;gap:8px}
+.send-btn{background:var(--blue);color:#fff;border-radius:var(--rf);padding:9px 22px;font-size:14px;font-weight:500;transition:background .15s}
+.send-btn:hover{background:var(--blue-d)}
+.cicon-btn{width:36px;height:36px;border-radius:50%;background:none;color:var(--txt2);font-size:17px;display:flex;align-items:center;justify-content:center;transition:background .12s}
+.cicon-btn:hover{background:var(--sur2)}
 
-/* ───── TOAST ───── */
-.toast {
-  position: fixed;
-  bottom: 24px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: #323232;
-  color: #fff;
-  padding: 13px 22px;
-  border-radius: var(--radius-sm);
-  font-size: 14px;
-  z-index: 3000;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  box-shadow: var(--shadow-lg);
-  animation: toastIn .25s ease;
-  max-width: 440px;
-}
-@keyframes toastIn { from{opacity:0;transform:translateX(-50%) translateY(12px)} to{opacity:1;transform:translateX(-50%) translateY(0)} }
+/* ── TOAST ── */
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#323232;color:#fff;padding:13px 22px;border-radius:var(--rs);font-size:14px;z-index:3000;display:flex;align-items:center;gap:10px;box-shadow:var(--sh-lg);animation:toastIn .25s ease;max-width:440px}
+@keyframes toastIn{from{opacity:0;transform:translateX(-50%) translateY(12px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
 
-/* ───── MODAL ───── */
-.modal-overlay {
-  position: fixed; inset: 0;
-  background: rgba(0,0,0,.48);
-  display: flex; align-items: center; justify-content: center;
-  z-index: 2000;
-  animation: fadeIn .18s ease;
-}
-@keyframes fadeIn { from{opacity:0} to{opacity:1} }
-.modal-box {
-  background: var(--surface);
-  border-radius: 20px;
-  padding: 36px 40px;
-  max-width: 460px;
-  width: 90%;
-  box-shadow: var(--shadow-lg);
-  animation: slideUp .22s ease;
-}
-@keyframes slideUp { from{transform:translateY(20px);opacity:0} to{transform:none;opacity:1} }
-.modal-title { font-size: 20px; font-weight: 500; margin-bottom: 6px; }
-.modal-subtitle { font-size: 14px; color: var(--text3); margin-bottom: 20px; }
-.modal-input {
-  width: 100%;
-  border: 1.5px solid var(--border);
-  border-radius: var(--radius-sm);
-  padding: 11px 14px;
-  font-size: 14px;
-  margin-bottom: 12px;
-  transition: border-color .2s;
-}
-.modal-input:focus { border-color: var(--z-blue); }
-.modal-btns { display: flex; gap: 8px; justify-content: flex-end; margin-top: 8px; }
+/* ── MODAL ── */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.48);display:flex;align-items:center;justify-content:center;z-index:2000;animation:fadeIn .18s ease}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.modal-box{background:var(--sur);border-radius:20px;padding:36px 40px;max-width:460px;width:90%;box-shadow:var(--sh-lg);animation:slideUp .22s ease}
+@keyframes slideUp{from{transform:translateY(20px);opacity:0}to{transform:none;opacity:1}}
+.modal-title{font-size:20px;font-weight:500;margin-bottom:6px}
+.modal-sub{font-size:14px;color:var(--txt3);margin-bottom:20px}
+.modal-input{width:100%;border:1.5px solid var(--bdr);border-radius:var(--rs);padding:11px 14px;font-size:14px;margin-bottom:12px;transition:border-color .2s}
+.modal-input:focus{border-color:var(--blue)}
+.modal-btns{display:flex;gap:8px;justify-content:flex-end;margin-top:8px}
 
-/* ───── ADMIN ───── */
-#admin-screen { display: flex; height: 100vh; overflow: hidden; }
-.adm-sidebar {
-  width: 248px;
-  background: #1a1a2e;
-  color: #c8ccd4;
-  flex-shrink: 0;
-  display: flex;
-  flex-direction: column;
-  overflow-y: auto;
-}
-.adm-logo { padding: 24px 20px 20px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid #2e2e4a; }
-.adm-logo svg { width: 26px; height: 26px; }
-.adm-logo-text { font-size: 17px; font-weight: 600; color: #a78bfa; }
-.adm-section-label { padding: 16px 20px 6px; font-size: 10px; letter-spacing: 1.2px; text-transform: uppercase; color: #5c6380; }
-.adm-nav {
-  padding: 4px 12px 4px;
-  border-radius: 0 var(--radius-full) var(--radius-full) 0;
-  margin-right: 12px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  height: 38px;
-  cursor: pointer;
-  font-size: 13.5px;
-  transition: background .12s, color .12s;
-  color: #9ca3b0;
-}
-.adm-nav:hover { background: #2a2a46; color: #e2e5ed; }
-.adm-nav.active { background: #2a2a46; color: #a78bfa; font-weight: 500; }
-.adm-nav-icon { font-size: 15px; width: 20px; text-align: center; flex-shrink: 0; }
-.adm-sep { height: 1px; background: #2e2e4a; margin: 10px 0; }
-.adm-content { flex: 1; overflow-y: auto; background: #f4f6fb; padding: 28px; }
-.adm-topbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
-.adm-page-title { font-size: 22px; font-weight: 500; color: var(--text); }
-.adm-status { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--text3); }
-.stat-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 16px; margin-bottom: 24px; }
-.stat-card { background: var(--surface); border-radius: var(--radius); padding: 22px; box-shadow: var(--shadow); }
-.stat-num { font-size: 34px; font-weight: 600; line-height: 1; margin-bottom: 4px; }
-.stat-label { font-size: 12px; color: var(--text3); font-weight: 500; text-transform: uppercase; letter-spacing: .5px; }
-.adm-card { background: var(--surface); border-radius: var(--radius); padding: 22px; box-shadow: var(--shadow); margin-bottom: 16px; }
-.adm-card-title { font-size: 15px; font-weight: 600; margin-bottom: 16px; color: var(--text); }
-.tbl { width: 100%; border-collapse: collapse; }
-.tbl th { text-align: left; padding: 9px 12px; font-size: 11px; color: var(--text3); font-weight: 600; text-transform: uppercase; letter-spacing: .5px; border-bottom: 1.5px solid var(--border); }
-.tbl td { padding: 11px 12px; border-bottom: 1px solid #f1f3f4; font-size: 13px; vertical-align: middle; }
-.tbl tr:hover td { background: #f8fafd; }
-.badge { display: inline-flex; align-items: center; padding: 3px 10px; border-radius: var(--radius-full); font-size: 12px; font-weight: 500; white-space: nowrap; }
-.badge-blue { background: #e8f0fe; color: #1a6cf6; }
-.badge-green { background: #e6f4ea; color: #1e8e3e; }
-.badge-red { background: #fce8e6; color: #c62828; }
-.badge-gray { background: #f1f3f4; color: #5f6368; }
-.badge-orange { background: #fff3e0; color: #e65100; }
-.badge-purple { background: #f3e8fd; color: #7c4dff; }
-.btn-xs { padding: 5px 12px; border-radius: var(--radius-sm); font-size: 12px; font-weight: 500; cursor: pointer; border: 1.5px solid; transition: .15s; white-space: nowrap; }
-.btn-danger { background: var(--z-red); color: #fff; border-color: var(--z-red); }
-.btn-danger:hover { background: #c62828; border-color: #c62828; }
-.btn-success { background: var(--z-green); color: #fff; border-color: var(--z-green); }
-.btn-success:hover { background: #155d2d; border-color: #155d2d; }
-.btn-warn { background: var(--z-yellow); color: #202124; border-color: var(--z-yellow); }
-.btn-warn:hover { background: #d49200; border-color: #d49200; }
-.btn-outline-blue { background: #fff; color: var(--z-blue); border-color: var(--z-blue); }
-.btn-outline-blue:hover { background: var(--z-blue-light); }
-.btn-outline-gray { background: #fff; color: var(--text2); border-color: var(--border); }
-.btn-outline-gray:hover { background: var(--surface2); }
-/* Toggle */
-.toggle { position: relative; width: 44px; height: 24px; }
-.toggle input { opacity: 0; width: 0; height: 0; position: absolute; }
-.toggle-track { position: absolute; inset: 0; background: #ccc; border-radius: 24px; cursor: pointer; transition: background .25s; }
-.toggle-track::before { content: ''; position: absolute; width: 18px; height: 18px; left: 3px; top: 3px; background: #fff; border-radius: 50%; transition: transform .25s; box-shadow: 0 1px 3px rgba(0,0,0,.2); }
-.toggle input:checked + .toggle-track { background: var(--z-blue); }
-.toggle input:checked + .toggle-track::before { transform: translateX(20px); }
-/* PW cell */
-.pw-cell { font-family: 'DM Mono', monospace; font-size: 12px; color: var(--text3); cursor: help; max-width: 130px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-/* PFP request */
-.pfp-req-row { display: flex; align-items: center; gap: 14px; padding: 12px; border: 1px solid var(--border); border-radius: var(--radius-sm); margin-bottom: 10px; }
-.pfp-preview { width: 52px; height: 52px; border-radius: 50%; object-fit: cover; }
-/* Activity feed */
-.activity-row { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid #f1f3f4; }
-.activity-ava { width: 34px; height: 34px; border-radius: 50%; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; color: #fff; }
-.activity-info { flex: 1; min-width: 0; }
-.activity-main { font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.activity-sub { font-size: 12px; color: var(--text3); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.activity-time { font-size: 11px; color: var(--text3); }
-/* Tabs */
-.tabs { display: flex; border-bottom: 1.5px solid var(--border); margin-bottom: 20px; gap: 0; }
-.tab-btn { padding: 9px 20px; font-size: 14px; color: var(--text3); border-bottom: 2px solid transparent; cursor: pointer; transition: color .15s; background: none; margin-bottom: -1.5px; }
-.tab-btn.active { color: var(--z-blue); border-bottom-color: var(--z-blue); font-weight: 500; }
+/* ── ADMIN ── */
+#admin-screen{display:flex;height:100vh;overflow:hidden}
+.adm-sidebar{width:250px;background:#1a1a2e;color:#c8ccd4;flex-shrink:0;display:flex;flex-direction:column;overflow-y:auto}
+.adm-logo{padding:24px 20px 20px;display:flex;align-items:center;gap:10px;border-bottom:1px solid #2e2e4a}
+.adm-logo-txt{font-size:17px;font-weight:600;color:#a78bfa}
+.adm-sec-lbl{padding:16px 20px 6px;font-size:10px;letter-spacing:1.2px;text-transform:uppercase;color:#5c6380}
+.adm-nav{padding:4px 12px;border-radius:0 var(--rf) var(--rf) 0;margin-right:12px;display:flex;align-items:center;gap:10px;height:38px;cursor:pointer;font-size:13.5px;transition:background .12s,color .12s;color:#9ca3b0}
+.adm-nav:hover{background:#2a2a46;color:#e2e5ed}
+.adm-nav.active{background:#2a2a46;color:#a78bfa;font-weight:500}
+.adm-nav-icon{font-size:15px;width:20px;text-align:center;flex-shrink:0}
+.adm-sep{height:1px;background:#2e2e4a;margin:10px 0}
+.adm-content{flex:1;overflow-y:auto;background:#f4f6fb;padding:28px}
+.adm-topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px}
+.adm-page-title{font-size:22px;font-weight:500;color:var(--txt)}
+.adm-status{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--txt3)}
+.stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px}
+.stat-card{background:var(--sur);border-radius:var(--r);padding:22px;box-shadow:var(--sh)}
+.stat-num{font-size:34px;font-weight:600;line-height:1;margin-bottom:4px}
+.stat-label{font-size:12px;color:var(--txt3);font-weight:500;text-transform:uppercase;letter-spacing:.5px}
+.adm-card{background:var(--sur);border-radius:var(--r);padding:22px;box-shadow:var(--sh);margin-bottom:16px}
+.adm-card-title{font-size:15px;font-weight:600;margin-bottom:16px;color:var(--txt)}
+.tbl{width:100%;border-collapse:collapse}
+.tbl th{text-align:left;padding:9px 12px;font-size:11px;color:var(--txt3);font-weight:600;text-transform:uppercase;letter-spacing:.5px;border-bottom:1.5px solid var(--bdr)}
+.tbl td{padding:11px 12px;border-bottom:1px solid #f1f3f4;font-size:13px;vertical-align:middle}
+.tbl tr:hover td{background:#f8fafd}
+.badge{display:inline-flex;align-items:center;padding:3px 10px;border-radius:var(--rf);font-size:12px;font-weight:500;white-space:nowrap}
+.b-blue{background:#e8f0fe;color:#1a6cf6}
+.b-green{background:#e6f4ea;color:#1e8e3e}
+.b-red{background:#fce8e6;color:#c62828}
+.b-gray{background:#f1f3f4;color:#5f6368}
+.b-orange{background:#fff3e0;color:#e65100}
+.b-purple{background:#f3e8fd;color:#7c4dff}
+.btn-xs{padding:5px 12px;border-radius:var(--rs);font-size:12px;font-weight:500;cursor:pointer;border:1.5px solid;transition:.15s;white-space:nowrap}
+.btn-d{background:var(--red);color:#fff;border-color:var(--red)}.btn-d:hover{background:#c62828}
+.btn-s{background:var(--green);color:#fff;border-color:var(--green)}.btn-s:hover{background:#155d2d}
+.btn-ob{background:#fff;color:var(--blue);border-color:var(--blue)}.btn-ob:hover{background:var(--blue-l)}
+.btn-og{background:#fff;color:var(--txt2);border-color:var(--bdr)}.btn-og:hover{background:var(--sur2)}
+.btn-purple{background:var(--purple);color:#fff;border-color:var(--purple)}.btn-purple:hover{background:#5e35b1}
+.btn-w{background:var(--yellow);color:#202124;border-color:var(--yellow)}.btn-w:hover{background:#d49200}
+.toggle{position:relative;width:44px;height:24px}
+.toggle input{opacity:0;width:0;height:0;position:absolute}
+.tgl-track{position:absolute;inset:0;background:#ccc;border-radius:24px;cursor:pointer;transition:background .25s}
+.tgl-track::before{content:'';position:absolute;width:18px;height:18px;left:3px;top:3px;background:#fff;border-radius:50%;transition:transform .25s;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+.toggle input:checked+.tgl-track{background:var(--blue)}
+.toggle input:checked+.tgl-track::before{transform:translateX(20px)}
+.pw-cell{font-family:'DM Mono',monospace;font-size:12px;color:var(--txt3);cursor:help;max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pfp-req-row{display:flex;align-items:center;gap:14px;padding:12px;border:1px solid var(--bdr);border-radius:var(--rs);margin-bottom:10px}
+.pfp-preview{width:52px;height:52px;border-radius:50%;object-fit:cover}
+/* news editor in admin */
+.news-editor-item{background:var(--sur2);border:1.5px solid var(--bdr);border-radius:var(--r);padding:16px;margin-bottom:12px;position:relative}
+.news-editor-item input,.news-editor-item textarea{width:100%;border:1.5px solid var(--bdr);border-radius:var(--rs);padding:8px 12px;font-size:13px;margin-bottom:8px;background:var(--sur)}
+.news-editor-item textarea{resize:none;min-height:70px}
+/* profile page */
+.profile-page{padding:32px 40px;max-width:700px;flex:1;overflow-y:auto}
+.profile-big-ava{width:96px;height:96px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:36px;font-weight:600;color:#fff;overflow:hidden;cursor:pointer;position:relative;flex-shrink:0}
+.profile-big-ava img{width:100%;height:100%;object-fit:cover;border-radius:50%}
+.profile-big-ava:hover .pfp-hover{display:flex}
+.info-row{display:flex;align-items:center;gap:10px;padding:12px 0;border-bottom:1px solid #f1f3f4}
+.info-lbl{font-size:13px;color:var(--txt3);width:140px;flex-shrink:0}
+.info-val{font-size:14px;color:var(--txt);flex:1}
 </style>
 </head>
 <body>
 
-<!-- AUTH -->
-<div id="auth-screen">
-  <div class="auth-logo-wrap">
-    <svg class="auth-logo-icon" viewBox="0 0 44 44" fill="none">
-      <rect width="44" height="44" rx="11" fill="#1a6cf6"/>
-      <path d="M9 13h26v20a2 2 0 01-2 2H11a2 2 0 01-2-2V13z" fill="#fff" opacity=".92"/>
-      <path d="M9 13l13 10 13-10" stroke="#1a6cf6" stroke-width="2.5" fill="none" stroke-linejoin="round"/>
-    </svg>
-    <span class="auth-logo-name">Z<b>Mail</b></span>
-  </div>
-  <div class="auth-card" id="auth-card">
-    <h2 id="auth-title">Iniciar sesión</h2>
-    <p class="auth-subtitle" id="auth-sub">Usa tu cuenta ZMail</p>
-    <div id="auth-msg-box"></div>
-    <div id="auth-form-login">
-      <div class="field-group"><label>Correo electrónico</label><input type="email" id="li-email" placeholder="tucorreo@zmail.com"></div>
-      <div class="field-group"><label>Contraseña</label><input type="password" id="li-pass" placeholder="••••••••"></div>
-      <button class="btn-primary" id="do-login">Iniciar sesión</button>
-      <div class="auth-footer">
-        <span class="link" id="to-register">Crear cuenta</span>
-        <span class="link" style="color:var(--text3);cursor:default">¿Olvidaste tu contraseña?</span>
+<!-- ═══ AUTH PAGE ═══ -->
+<div id="auth-page">
+  <div class="auth-left">
+    <div class="auth-logo-wrap">
+      <svg width="44" height="44" viewBox="0 0 44 44" fill="none"><rect width="44" height="44" rx="11" fill="#1a6cf6"/><path d="M9 13h26v20a2 2 0 01-2 2H11a2 2 0 01-2-2V13z" fill="#fff" opacity=".92"/><path d="M9 13l13 10 13-10" stroke="#1a6cf6" stroke-width="2.5" fill="none" stroke-linejoin="round"/></svg>
+      <span class="auth-logo-name">Z<b>Mail</b></span>
+    </div>
+    <div class="auth-card">
+      <h2 id="auth-title">Iniciar sesión</h2>
+      <p class="auth-sub" id="auth-sub">Usa tu cuenta ZMail</p>
+      <div id="auth-msg-box"></div>
+      <div id="auth-form-login">
+        <div class="fg"><label>Correo electrónico</label><input type="email" id="li-email" placeholder="tucorreo@zmail.com"></div>
+        <div class="fg"><label>Contraseña</label><input type="password" id="li-pass" placeholder="••••••••"></div>
+        <button class="btn-pri" id="do-login">Iniciar sesión</button>
+        <div class="auth-foot"><span class="lnk" id="to-register">Crear cuenta</span><span style="color:var(--txt3);font-size:14px;cursor:default">¿Olvidaste tu contraseña?</span></div>
+      </div>
+      <div id="auth-form-register" class="hidden">
+        <div class="fg"><label>Nombre completo</label><input type="text" id="rg-name" placeholder="Tu nombre"></div>
+        <div class="fg"><label>Correo electrónico</label><input type="email" id="rg-email" placeholder="tucorreo@zmail.com"></div>
+        <div class="fg"><label>Contraseña</label><input type="password" id="rg-pass" placeholder="Mínimo 6 caracteres"></div>
+        <div class="fg"><label>Confirmar contraseña</label><input type="password" id="rg-pass2" placeholder="Repite la contraseña"></div>
+        <button class="btn-pri" id="do-register">Crear cuenta</button>
+        <div class="auth-foot"><span class="lnk" id="to-login">Ya tengo cuenta</span></div>
       </div>
     </div>
-    <div id="auth-form-register" class="hidden">
-      <div class="field-group"><label>Nombre completo</label><input type="text" id="rg-name" placeholder="Tu nombre"></div>
-      <div class="field-group"><label>Correo electrónico</label><input type="email" id="rg-email" placeholder="tucorreo@zmail.com"></div>
-      <div class="field-group"><label>Contraseña</label><input type="password" id="rg-pass" placeholder="Mínimo 6 caracteres"></div>
-      <div class="field-group"><label>Confirmar contraseña</label><input type="password" id="rg-pass2" placeholder="Repite la contraseña"></div>
-      <button class="btn-primary" id="do-register">Crear cuenta</button>
-      <div class="auth-footer">
-        <span class="link" id="to-login">Ya tengo cuenta</span>
-      </div>
-    </div>
+    <div style="margin-top:24px;font-size:12px;color:#9aa0a6">© 2025 ZMail Technologies · Privacidad · Términos</div>
   </div>
-  <div style="margin-top:24px;font-size:12px;color:#9aa0a6">© 2025 ZMail Technologies · Privacidad · Términos</div>
-</div>
-
-<!-- BANNED -->
-<div id="banned-screen" class="overlay-screen hidden">
-  <div class="overlay-card">
-    <div class="overlay-icon">🚫</div>
-    <h2 style="color:var(--z-red)">Cuenta suspendida</h2>
-    <p>Tu cuenta ha sido suspendida. Motivo:</p>
-    <div class="ban-reason-box" id="ban-reason-display"></div>
-    <p style="font-size:13px;color:var(--text3);margin-top:12px">¿Crees que es un error? Escribe a <b>soporte@zmail.com</b></p>
-    <button class="btn-primary" style="margin-top:20px" onclick="logout()">Volver al inicio</button>
+  <!-- BLOG DE NOTICIAS (solo admins pueden editar) -->
+  <div class="auth-right" id="auth-right">
+    <div class="news-header">
+      <div class="news-header-title">Últimas noticias</div>
+      <div class="news-header-brand">ZMail News</div>
+    </div>
+    <div class="news-scroll" id="news-scroll"></div>
   </div>
 </div>
 
-<!-- SYSDOWN (usuarios) -->
+<!-- ═══ BAN OVERLAY ═══ -->
+<div id="ban-overlay" class="hidden">
+  <div class="ban-card">
+    <span class="ban-icon">🚫</span>
+    <div class="ban-title">Has sido suspendido</div>
+    <div class="ban-sub">Un administrador ha suspendido tu cuenta de ZMail</div>
+    <div class="ban-reason-box">
+      <div class="ban-reason-lbl">Motivo de la suspensión</div>
+      <div class="ban-reason-txt" id="ban-reason-txt"></div>
+    </div>
+    <button class="ban-btn" onclick="confirmBan()">Entendido</button>
+    <p style="font-size:12px;color:var(--txt3);margin-top:16px">¿Error? Escribe a <b>soporte@zmail.com</b></p>
+  </div>
+</div>
+
+<!-- ═══ SYSDOWN ═══ -->
 <div id="sysdown-screen" class="overlay-screen hidden">
-  <div class="overlay-card">
-    <div class="overlay-icon">🔧</div>
-    <h2>ZMail vuelve pronto</h2>
-    <p id="sysdown-msg-display" style="margin-top:8px;color:var(--text2)"></p>
-    <button class="btn-primary" style="margin-top:28px;width:auto;padding:12px 32px" onclick="logout()">Volver</button>
+  <div class="overlay-card" style="text-align:center">
+    <div style="font-size:56px;margin-bottom:20px">🔧</div>
+    <h2 style="font-size:24px;font-weight:500;margin-bottom:12px">ZMail vuelve pronto</h2>
+    <p id="sysdown-msg-display" style="color:var(--txt2)"></p>
+    <button class="btn-pri" style="margin-top:28px;width:auto;padding:12px 32px" onclick="logout()">Volver</button>
   </div>
 </div>
 
-<!-- SYSDOWN BANNER (admin) -->
-<div id="sysdown-admin-banner" class="sysdown-banner hidden">
-  🔧 Modo mantenimiento ACTIVO — los usuarios normales ven la pantalla de mantenimiento. <b>Tú (admin) no te ves afectado.</b>
-</div>
+<!-- BANNERS -->
+<div id="sysdown-admin-banner" class="sysdown-banner hidden">🔧 Modo mantenimiento ACTIVO — los usuarios normales ven pantalla de mantenimiento. <b>Tú (admin) no te ves afectado.</b></div>
+<div id="announce-banner" class="announce-banner hidden"><span id="announce-text"></span><button class="close-btn-sm" onclick="document.getElementById('announce-banner').classList.add('hidden')">✕</button></div>
 
-<!-- MAIN APP -->
+<!-- ═══ MAIN APP ═══ -->
 <div id="app-screen" class="hidden">
-  <div class="topbar" id="main-topbar">
+  <div class="topbar">
     <div class="topbar-logo" id="logo-home">
-      <svg viewBox="0 0 30 30" fill="none">
-        <rect width="30" height="30" rx="7" fill="#1a6cf6"/>
-        <path d="M5 9h20v14a1.5 1.5 0 01-1.5 1.5H6.5A1.5 1.5 0 015 23V9z" fill="#fff" opacity=".92"/>
-        <path d="M5 9l10 8 10-8" stroke="#1a6cf6" stroke-width="2" fill="none"/>
-      </svg>
-      <span class="topbar-logo-text">Z<b>Mail</b></span>
+      <svg width="30" height="30" viewBox="0 0 30 30" fill="none"><rect width="30" height="30" rx="7" fill="#1a6cf6"/><path d="M5 9h20v14a1.5 1.5 0 01-1.5 1.5H6.5A1.5 1.5 0 015 23V9z" fill="#fff" opacity=".92"/><path d="M5 9l10 8 10-8" stroke="#1a6cf6" stroke-width="2" fill="none"/></svg>
+      <span class="tl-text">Z<b>Mail</b></span>
     </div>
-    <div class="search-wrap">
-      <span class="search-icon">🔍</span>
-      <input type="text" id="search-input" placeholder="Buscar en el correo...">
-    </div>
-    <div class="topbar-actions">
-      <div class="live-indicator"><span class="live-dot"></span>En vivo</div>
-      <button class="topbar-icon-btn" id="goto-admin-btn" style="display:none" title="Panel Admin">⚙️</button>
-      <div class="avatar-wrap">
-        <div class="avatar-btn" id="avatar-topbar-btn" style="background:#1a6cf6"></div>
-        <div id="profile-dropdown" class="profile-dd hidden">
-          <div class="profile-dd-header">
-            <div class="profile-pic-wrap" id="profile-pic-wrap" style="background:#1a6cf6">
-              <div class="pic-overlay">Cambiar<br>foto</div>
-            </div>
-            <input type="file" id="pfp-file-input" accept="image/*">
-            <div class="profile-dd-name" id="dd-name"></div>
-            <div class="profile-dd-email" id="dd-email"></div>
-            <div id="dd-verified"></div>
+    <div class="search-wrap"><span style="color:var(--txt3);font-size:18px">🔍</span><input type="text" id="search-input" placeholder="Buscar en el correo..."></div>
+    <div class="tbar-right">
+      <div class="live-ind"><span class="live-dot"></span>En vivo</div>
+      <button class="icon-btn-tbar hidden" id="goto-admin-btn" title="Panel Admin">⚙️<span id="admin-notif-dot" class="notif-dot hidden"></span></button>
+      <div class="ava-wrap">
+        <div class="ava-btn" id="ava-topbar" style="background:#1a6cf6"></div>
+        <div id="profile-dd" class="profile-dd hidden">
+          <div class="pdd-header">
+            <div class="pfp-wrap" id="pfp-wrap" style="background:#1a6cf6"><div class="pfp-hover">Cambiar<br>foto</div></div>
+            <input type="file" id="pfp-input" accept="image/*">
+            <div class="pdd-name" id="dd-name"></div>
+            <div class="pdd-email" id="dd-email"></div>
+            <div id="dd-v-wrap"></div>
           </div>
-          <div class="dd-item" id="dd-logout">🚪 Cerrar sesión</div>
+          <div class="dd-row" id="dd-profile">👤 Mi perfil</div>
+          <div class="dd-row" id="dd-settings">⚙️ Configuración</div>
+          <div class="dd-row" id="dd-logout">🚪 Cerrar sesión</div>
         </div>
       </div>
     </div>
   </div>
   <div class="body-wrap">
-    <nav class="sidebar" id="main-sidebar">
+    <nav class="sidebar">
       <button class="compose-btn" id="compose-btn">
-        <svg viewBox="0 0 20 20" fill="none"><path d="M3 13.5V17h3.5l9-9L12 4.5l-9 9zm13.7-7.7a1 1 0 000-1.41l-2.1-2.1a1 1 0 00-1.41 0l-1.4 1.4 3.5 3.5 1.41-1.4z" fill="currentColor"/></svg>
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M3 13.5V17h3.5l9-9L12 4.5l-9 9zm13.7-7.7a1 1 0 000-1.41l-2.1-2.1a1 1 0 00-1.41 0l-1.4 1.4 3.5 3.5 1.41-1.4z" fill="currentColor"/></svg>
         Redactar
       </button>
-      <div class="nav-item active" data-folder="inbox"><span class="nav-icon">📥</span> Recibidos <span class="nav-count" id="inbox-count"></span></div>
-      <div class="nav-item" data-folder="starred"><span class="nav-icon">⭐</span> Destacados</div>
-      <div class="nav-item" data-folder="important"><span class="nav-icon">🔖</span> Importantes</div>
+      <div class="nav-item active" data-folder="inbox"><span class="nav-icon">📥</span>Recibidos<span class="nav-count" id="inbox-count"></span></div>
+      <div class="nav-item" data-folder="starred"><span class="nav-icon">⭐</span>Destacados</div>
+      <div class="nav-item" data-folder="important"><span class="nav-icon">🔖</span>Importantes</div>
       <div class="nav-sep"></div>
-      <div class="nav-item" data-folder="sent"><span class="nav-icon">📤</span> Enviados</div>
-      <div class="nav-item" data-folder="drafts"><span class="nav-icon">📝</span> Borradores <span class="nav-count" id="draft-count"></span></div>
-      <div class="nav-item" data-folder="trash"><span class="nav-icon">🗑️</span> Papelera</div>
+      <div class="nav-item" data-folder="sent"><span class="nav-icon">📤</span>Enviados</div>
+      <div class="nav-item" data-folder="drafts"><span class="nav-icon">📝</span>Borradores<span class="nav-count" id="draft-count"></span></div>
+      <div class="nav-item" data-folder="trash"><span class="nav-icon">🗑️</span>Papelera</div>
+      <div class="nav-sep"></div>
+      <div class="nav-item" data-folder="profile-page"><span class="nav-icon">👤</span>Mi perfil</div>
     </nav>
-    <div style="flex:1;display:flex;overflow:hidden;">
+    <div style="flex:1;display:flex;overflow:hidden">
       <div class="email-list-pane" id="email-list-pane"></div>
-      <div id="email-viewer-pane" style="flex:1;overflow-y:auto;border-left:1px solid var(--border);display:none;"></div>
+      <div id="email-viewer-pane" style="flex:1;overflow-y:auto;border-left:1px solid var(--bdr);display:none"></div>
     </div>
   </div>
 </div>
 
-<!-- ADMIN -->
+<!-- ═══ ADMIN ═══ -->
 <div id="admin-screen" class="hidden">
   <div class="adm-sidebar">
     <div class="adm-logo">
-      <svg viewBox="0 0 26 26" fill="none"><rect width="26" height="26" rx="7" fill="#a78bfa"/><path d="M4 8h18v12a1 1 0 01-1 1H5a1 1 0 01-1-1V8z" fill="#1a1a2e" opacity=".9"/><path d="M4 8l9 7 9-7" stroke="#a78bfa" stroke-width="1.8" fill="none"/></svg>
-      <span class="adm-logo-text">ZMail Admin</span>
+      <svg width="26" height="26" viewBox="0 0 26 26" fill="none"><rect width="26" height="26" rx="7" fill="#a78bfa"/><path d="M4 8h18v12a1 1 0 01-1 1H5a1 1 0 01-1-1V8z" fill="#1a1a2e" opacity=".9"/><path d="M4 8l9 7 9-7" stroke="#a78bfa" stroke-width="1.8" fill="none"/></svg>
+      <span class="adm-logo-txt">ZMail Admin</span>
     </div>
-    <div class="adm-section-label">Panel</div>
-    <div class="adm-nav active" data-adm="dashboard"><span class="adm-nav-icon">📊</span> Dashboard</div>
-    <div class="adm-nav" data-adm="users"><span class="adm-nav-icon">👥</span> Usuarios</div>
-    <div class="adm-nav" data-adm="emails"><span class="adm-nav-icon">✉️</span> Correos</div>
-    <div class="adm-nav" data-adm="pfp"><span class="adm-nav-icon">🖼️</span> Fotos pendientes</div>
+    <div class="adm-sec-lbl">Panel</div>
+    <div class="adm-nav active" data-adm="dashboard"><span class="adm-nav-icon">📊</span>Dashboard</div>
+    <div class="adm-nav" data-adm="users"><span class="adm-nav-icon">👥</span>Usuarios</div>
+    <div class="adm-nav" data-adm="emails"><span class="adm-nav-icon">✉️</span>Correos</div>
+    <div class="adm-nav" data-adm="pfp"><span class="adm-nav-icon">🖼️</span>Fotos pendientes<span id="pfp-badge" style="margin-left:auto;background:var(--red);color:#fff;border-radius:10px;padding:1px 7px;font-size:11px"></span></div>
     <div class="adm-sep"></div>
-    <div class="adm-section-label">Configuración</div>
-    <div class="adm-nav" data-adm="admins"><span class="adm-nav-icon">🛡️</span> Admins</div>
-    <div class="adm-nav" data-adm="system"><span class="adm-nav-icon">⚙️</span> Sistema</div>
-    <div class="adm-nav" data-adm="logs"><span class="adm-nav-icon">📋</span> Registros</div>
+    <div class="adm-sec-lbl">Configuración</div>
+    <div class="adm-nav" data-adm="admins"><span class="adm-nav-icon">🛡️</span>Admins</div>
+    <div class="adm-nav" data-adm="news"><span class="adm-nav-icon">📰</span>Blog de noticias</div>
+    <div class="adm-nav" data-adm="announce"><span class="adm-nav-icon">📢</span>Anuncios</div>
+    <div class="adm-nav" data-adm="system"><span class="adm-nav-icon">⚙️</span>Sistema</div>
+    <div class="adm-nav" data-adm="logs"><span class="adm-nav-icon">📋</span>Registros</div>
     <div class="adm-sep"></div>
-    <div class="adm-nav" id="back-to-mail"><span class="adm-nav-icon">←</span> Volver al correo</div>
+    <div class="adm-nav" id="back-to-mail"><span class="adm-nav-icon">←</span>Volver al correo</div>
   </div>
   <div class="adm-content" id="adm-content"></div>
 </div>
 
-<!-- COMPOSE MODAL -->
+<!-- COMPOSE -->
 <div id="compose-modal" class="compose-modal hidden">
-  <div class="compose-header">
-    <span class="compose-header-title">Nuevo mensaje</span>
-    <button class="compose-close" id="compose-close">✕</button>
-  </div>
-  <div class="compose-field"><span class="compose-label">Para</span><input type="email" id="cm-to" placeholder="destinatario@zmail.com"></div>
-  <div class="compose-field"><span class="compose-label">Asunto</span><input type="text" id="cm-subject" placeholder=""></div>
-  <div class="compose-body"><textarea id="cm-body" placeholder="Escribe tu mensaje..."></textarea></div>
-  <div class="compose-footer">
+  <div class="compose-hdr"><span style="font-size:14px;font-weight:500">Nuevo mensaje</span><button class="compose-close" id="compose-close">✕</button></div>
+  <div class="cfield"><span class="clabel">Para</span><input type="email" id="cm-to" placeholder="destinatario@zmail.com"></div>
+  <div class="cfield"><span class="clabel">Cc</span><input type="email" id="cm-cc" placeholder=""></div>
+  <div class="cfield"><span class="clabel">Asunto</span><input type="text" id="cm-subject" placeholder=""></div>
+  <div class="cbody"><textarea id="cm-body" placeholder="Escribe tu mensaje..."></textarea></div>
+  <div class="cfoot">
     <button class="send-btn" id="send-btn">Enviar</button>
-    <button class="compose-icon-btn" id="save-draft-btn" title="Guardar borrador">💾</button>
-    <button class="compose-icon-btn" style="margin-left:auto" id="discard-btn" title="Descartar">🗑️</button>
+    <button class="cicon-btn" id="save-draft-btn" title="Guardar borrador">💾</button>
+    <button class="cicon-btn" style="margin-left:auto" id="discard-btn">🗑️</button>
   </div>
 </div>
 
-<!-- MODAL CONTAINER -->
 <div id="modal-container"></div>
 
 <script>
 // ══════════════════════════════════
-// DATABASE (localStorage)
+// VERIFIED BADGE SVG AZUL
 // ══════════════════════════════════
-const DB = {
-  get users(){ return JSON.parse(localStorage.getItem('zm_users')||'[]') },
-  set users(v){ localStorage.setItem('zm_users', JSON.stringify(v)) },
-  get emails(){ return JSON.parse(localStorage.getItem('zm_emails')||'[]') },
-  set emails(v){ localStorage.setItem('zm_emails', JSON.stringify(v)) },
-  get pfpReqs(){ return JSON.parse(localStorage.getItem('zm_pfp')||'[]') },
-  set pfpReqs(v){ localStorage.setItem('zm_pfp', JSON.stringify(v)) },
-  get adminShares(){ return JSON.parse(localStorage.getItem('zm_admins')||'[]') },
-  set adminShares(v){ localStorage.setItem('zm_admins', JSON.stringify(v)) },
-  get settings(){ return JSON.parse(localStorage.getItem('zm_settings')||'{"systemDown":false,"sysMsg":"Sistema en mantenimiento. Vuelve pronto."}') },
-  set settings(v){ localStorage.setItem('zm_settings', JSON.stringify(v)) },
+function vBadge(size){
+  const s=size==='lg'?20:size==='xl'?28:16;
+  return`<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="display:inline-flex;flex-shrink:0;vertical-align:middle"><path d="M12 2L14.4 5.2L18.4 4.4L19.6 8.2L23.2 9.6L21.6 13.2L23.2 16.8L19.6 18.2L18.4 22L14.4 21.2L12 24.4L9.6 21.2L5.6 22L4.4 18.2L0.8 16.8L2.4 13.2L0.8 9.6L4.4 8.2L5.6 4.4L9.6 5.2L12 2Z" fill="#1a6cf6"/><path d="M8.5 12.5L10.5 14.5L15.5 9.5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+}
+
+// ══════════════════════════════════
+// DB
+// ══════════════════════════════════
+const DB={
+  get users(){return JSON.parse(localStorage.getItem('zm2_users')||'[]')},
+  set users(v){localStorage.setItem('zm2_users',JSON.stringify(v))},
+  get emails(){return JSON.parse(localStorage.getItem('zm2_emails')||'[]')},
+  set emails(v){localStorage.setItem('zm2_emails',JSON.stringify(v))},
+  get pfpReqs(){return JSON.parse(localStorage.getItem('zm2_pfp')||'[]')},
+  set pfpReqs(v){localStorage.setItem('zm2_pfp',JSON.stringify(v))},
+  get adminShares(){return JSON.parse(localStorage.getItem('zm2_admins')||'[]')},
+  set adminShares(v){localStorage.setItem('zm2_admins',JSON.stringify(v))},
+  get settings(){return JSON.parse(localStorage.getItem('zm2_settings')||JSON.stringify({systemDown:false,sysMsg:"Sistema en mantenimiento. Vuelve pronto.",announcement:"",announcementActive:false}))},
+  set settings(v){localStorage.setItem('zm2_settings',JSON.stringify(v))},
+  get news(){return JSON.parse(localStorage.getItem('zm2_news')||JSON.stringify([{id:'n1',cat:'Bienvenida',title:'ZMail ya está disponible',text:'La nueva plataforma de correo inteligente ya está en línea. Regístrate gratis y disfruta de mensajes en tiempo real, verificación de cuenta y mucho más.',img:'',date:new Date().toISOString()}]))},
+  set news(v){localStorage.setItem('zm2_news',JSON.stringify(v))},
 };
 
 // ══════════════════════════════════
 // INIT
 // ══════════════════════════════════
-(function init(){
+(function(){
   if(!DB.users.find(u=>u.email==='admin@zmail.com')){
-    const users = DB.users;
-    users.push({id:'admin-001',email:'admin@zmail.com',password:'Admin123!',name:'Admin ZMail',role:'admin',verified:true,banned:false,banReason:'',createdAt:new Date().toISOString(),profilePic:null,profilePicApproved:true});
-    DB.users = users;
+    const a=DB.users;
+    a.push({id:'admin-001',email:'admin@zmail.com',password:'Admin123!',name:'Admin ZMail',role:'admin',verified:true,banned:false,banReason:'',createdAt:new Date().toISOString(),profilePic:null,profilePicApproved:true,bio:'',lastSeen:new Date().toISOString()});
+    DB.users=a;
   }
   if(!DB.emails.length){
-    const now = Date.now();
-    DB.emails = [
-      {id:'sys-1',from:'bienvenida@zmail.com',fromName:'ZMail',to:'admin@zmail.com',subject:'¡Bienvenido al panel ZMail!',body:'Hola Admin, tu plataforma está lista. Puedes gestionar usuarios, correos y configuración del sistema desde el panel de administración.\n\nAccede con el botón ⚙️ en la barra superior.',date:new Date(now-3600000).toISOString(),read:false,folder:'inbox',important:true,starred:false},
-      {id:'sys-2',from:'seguridad@zmail.com',fromName:'Seguridad ZMail',to:'admin@zmail.com',subject:'Tu cuenta fue verificada',body:'Hemos revisado tu cuenta y ha sido verificada exitosamente. El ícono ✓ ahora aparecerá junto a tu nombre.',date:new Date(now-7200000).toISOString(),read:true,folder:'inbox',important:false,starred:true},
+    const n=Date.now();
+    DB.emails=[
+      {id:'sys-1',from:'bienvenida@zmail.com',fromName:'ZMail',to:'admin@zmail.com',subject:'¡Bienvenido al panel ZMail!',body:'Hola Admin,\n\nTu plataforma está lista. Gestiona usuarios, correos y configuración desde el panel de administración.\n\nAccede con el botón ⚙️ en la barra superior.',date:new Date(n-3600000).toISOString(),read:false,folder:'inbox',important:true,starred:false},
+      {id:'sys-2',from:'seguridad@zmail.com',fromName:'Seguridad ZMail',to:'admin@zmail.com',subject:'Tu cuenta fue verificada ✓',body:'Tu cuenta ha sido verificada. La insignia azul ✓ aparecerá junto a tu nombre.',date:new Date(n-7200000).toISOString(),read:true,folder:'inbox',important:false,starred:true},
     ];
   }
+  renderNews();
 })();
+
+// ══════════════════════════════════
+// NEWS BLOG
+// ══════════════════════════════════
+function renderNews(){
+  const scroll=document.getElementById('news-scroll');
+  if(!scroll)return;
+  const items=DB.news;
+  if(!items.length){scroll.innerHTML=`<div class="news-empty">📰 No hay noticias aún</div>`;return;}
+  scroll.innerHTML=items.map(item=>`
+    <div class="news-item">
+      ${item.img?`<img src="${item.img}" class="news-item-img" onerror="this.style.display='none'">`:`<div class="news-item-img-placeholder">📰</div>`}
+      <div class="news-item-body">
+        ${item.cat?`<div class="news-item-cat">${item.cat}</div>`:''}
+        <div class="news-item-title">${item.title}</div>
+        ${item.text?`<div class="news-item-text">${item.text}</div>`:''}
+        <div class="news-item-date">${new Date(item.date).toLocaleDateString('es-CO',{year:'numeric',month:'long',day:'numeric'})}</div>
+      </div>
+    </div>`).join('');
+}
 
 // ══════════════════════════════════
 // STATE
 // ══════════════════════════════════
-let CU = null; // current user
-let currentFolder = 'inbox';
-let selectedEmailId = null;
-let searchQ = '';
-let admSection = 'dashboard';
+let CU=null;
+let currentFolder='inbox';
+let selectedEmailId=null;
+let searchQ='';
+let admSection='dashboard';
+let prevAdminShares=[];
+let prevBanState=false;
+let prevVerified=false;
 
 // ══════════════════════════════════
 // HELPERS
 // ══════════════════════════════════
-function uid(){ return Math.random().toString(36).slice(2)+Date.now().toString(36) }
-function initials(name){ return (name||'?').split(' ').map(x=>x[0]).join('').toUpperCase().slice(0,2) }
-const COLORS = ['#1a6cf6','#ea4335','#34a853','#f9ab00','#ab47bc','#00acc1','#ff7043','#5c6bc0','#0097a7','#388e3c'];
-function color(str){ let h=0; for(let c of (str||'')) h=((h<<5)-h)+c.charCodeAt(0); return COLORS[Math.abs(h)%COLORS.length] }
+function uid(){return Math.random().toString(36).slice(2)+Date.now().toString(36)}
+function initials(n){return(n||'?').split(' ').map(x=>x[0]).join('').toUpperCase().slice(0,2)}
+const COLS=['#1a6cf6','#ea4335','#34a853','#f9ab00','#ab47bc','#00acc1','#ff7043','#5c6bc0','#0097a7','#388e3c'];
+function clr(s){let h=0;for(let c of(s||''))h=((h<<5)-h)+c.charCodeAt(0);return COLS[Math.abs(h)%COLS.length]}
 function timeAgo(iso){
-  const d=new Date(iso), now=new Date(), diff=now-d;
-  if(diff<60000) return 'Ahora';
-  if(diff<3600000) return Math.floor(diff/60000)+'m';
-  if(diff<86400000){const h=Math.floor(diff/3600000);return h+'h';}
-  if(d.getFullYear()===now.getFullYear()) return d.toLocaleDateString('es-CO',{day:'numeric',month:'short'});
+  const d=new Date(iso),now=new Date(),diff=now-d;
+  if(diff<60000)return'Ahora';
+  if(diff<3600000)return Math.floor(diff/60000)+'m';
+  if(diff<86400000)return Math.floor(diff/3600000)+'h';
+  if(d.getFullYear()===now.getFullYear())return d.toLocaleDateString('es-CO',{day:'numeric',month:'short'});
   return d.toLocaleDateString('es-CO',{day:'numeric',month:'short',year:'2-digit'});
 }
-function isAdmin(u){ return u&&(u.role==='admin'||DB.adminShares.includes(u.email)) }
-function getUser(id){ return DB.users.find(u=>u.id===id) }
-function getUserByEmail(email){ return DB.users.find(u=>u.email===email) }
-function refreshUser(){ if(CU) CU = getUserByEmail(CU.email) || CU; }
-function saveUsers(arr){ DB.users = arr }
-
-function showToast(msg, dur=3200){
+function isAdmin(u){return u&&(u.role==='admin'||DB.adminShares.includes(u.email))}
+function getUByEmail(e){return DB.users.find(u=>u.email===e)}
+function avaHtml(name,email,pic,picOk,size=38,fs=13){
+  if(pic&&picOk)return`<img src="${pic}" style="width:${size}px;height:${size}px;border-radius:50%;object-fit:cover">`;
+  return`<span style="font-size:${fs}px">${initials(name||email)}</span>`;
+}
+function toast(msg,dur=3200){
   document.querySelectorAll('.toast').forEach(x=>x.remove());
-  const t=document.createElement('div'); t.className='toast';
+  const t=document.createElement('div');t.className='toast';
   t.innerHTML=`<span class="live-dot"></span>${msg}`;
   document.body.appendChild(t);
   setTimeout(()=>t.remove(),dur);
 }
-
 function showModal(html){
-  let c=document.getElementById('modal-container');
+  const c=document.getElementById('modal-container');
   c.innerHTML=`<div class="modal-overlay" id="main-modal">${html}</div>`;
-  c.querySelector('#main-modal').addEventListener('click',e=>{ if(e.target===c.querySelector('#main-modal'))closeModal(); });
+  c.querySelector('#main-modal').addEventListener('click',e=>{if(e.target.id==='main-modal')closeModal();});
 }
-function closeModal(){ document.getElementById('modal-container').innerHTML=''; }
+function closeModal(){document.getElementById('modal-container').innerHTML=''}
 
-function avatarHtml(name, email, pic, approved, size=38, fontSize=14){
-  if(pic&&approved) return `<img src="${pic}" style="width:${size}px;height:${size}px;border-radius:50%;object-fit:cover">`;
-  return `<span style="font-size:${fontSize}px">${initials(name||email)}</span>`;
+// ══════════════════════════════════
+// BAN ALERT
+// ══════════════════════════════════
+function showBanAlert(reason){
+  document.getElementById('ban-reason-txt').textContent=reason||'Violación de términos de servicio';
+  document.getElementById('ban-overlay').classList.remove('hidden');
+}
+function confirmBan(){
+  document.getElementById('ban-overlay').classList.add('hidden');
+  logout();
 }
 
 // ══════════════════════════════════
 // ROUTING
 // ══════════════════════════════════
 function showScreen(id){
-  ['auth-screen','banned-screen','sysdown-screen','app-screen','admin-screen'].forEach(s=>{
-    document.getElementById(s).classList.add('hidden');
-  });
-  document.getElementById(id).classList.remove('hidden');
+  ['auth-page','sysdown-screen','app-screen','admin-screen'].forEach(s=>document.getElementById(s)?.classList.add('hidden'));
+  document.getElementById(id)?.classList.remove('hidden');
 }
+function logout(){CU=null;currentFolder='inbox';selectedEmailId=null;searchQ='';prevBanState=false;showScreen('auth-page');renderNews();}
 
 function route(){
-  if(!CU){ showScreen('auth-screen'); return; }
-  if(CU.banned){ showBanned(); return; }
+  if(!CU){showScreen('auth-page');return;}
+  if(CU.banned){showBanAlert(CU.banReason);return;}
   const s=DB.settings;
-  if(s.systemDown && !isAdmin(CU)){ showSysDown(); return; }
-  if(CU._viewAdmin){ showAdminScreen(); return; }
+  if(s.systemDown&&!isAdmin(CU)){
+    showScreen('sysdown-screen');
+    document.getElementById('sysdown-msg-display').textContent=s.sysMsg;
+    return;
+  }
+  if(CU._viewAdmin){showAdminScreen();return;}
   showAppScreen();
 }
-
-function showBanned(){
-  showScreen('banned-screen');
-  document.getElementById('ban-reason-display').textContent = CU.banReason||'Violación de términos de servicio';
-}
-function showSysDown(){
-  showScreen('sysdown-screen');
-  document.getElementById('sysdown-msg-display').textContent = DB.settings.sysMsg;
-}
-
-function logout(){ CU=null; currentFolder='inbox'; selectedEmailId=null; searchQ=''; showScreen('auth-screen'); }
 
 // ══════════════════════════════════
 // AUTH
 // ══════════════════════════════════
-function showAuthMsg(msg, type='error'){
-  const el=document.getElementById('auth-msg-box');
-  el.innerHTML=`<div class="auth-msg ${type}">${msg}</div>`;
-}
-
+function authMsg(msg,type='error'){document.getElementById('auth-msg-box').innerHTML=`<div class="auth-msg ${type}">${msg}</div>`;}
 document.getElementById('to-register').onclick=()=>{
   document.getElementById('auth-form-login').classList.add('hidden');
   document.getElementById('auth-form-register').classList.remove('hidden');
@@ -883,33 +594,32 @@ document.getElementById('to-login').onclick=()=>{
   document.getElementById('auth-sub').textContent='Usa tu cuenta ZMail';
   document.getElementById('auth-msg-box').innerHTML='';
 };
-
 document.getElementById('do-login').onclick=()=>{
   const email=document.getElementById('li-email').value.trim();
   const pass=document.getElementById('li-pass').value;
   const u=DB.users.find(x=>x.email===email&&x.password===pass);
-  if(!u){showAuthMsg('Correo o contraseña incorrectos');return;}
-  CU=u; route();
+  if(!u){authMsg('Correo o contraseña incorrectos');return;}
+  if(u.banned){showBanAlert(u.banReason);return;}
+  CU=u;prevAdminShares=[...DB.adminShares];prevBanState=false;prevVerified=u.verified;
+  route();
 };
-document.getElementById('li-pass').addEventListener('keydown',e=>{ if(e.key==='Enter') document.getElementById('do-login').click(); });
-
+document.getElementById('li-pass').addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('do-login').click();});
 document.getElementById('do-register').onclick=()=>{
   const name=document.getElementById('rg-name').value.trim();
   const email=document.getElementById('rg-email').value.trim();
   const pass=document.getElementById('rg-pass').value;
   const pass2=document.getElementById('rg-pass2').value;
-  if(!name||!email||!pass){showAuthMsg('Completa todos los campos');return;}
-  if(!email.includes('@')){showAuthMsg('Correo inválido');return;}
-  if(pass.length<6){showAuthMsg('La contraseña debe tener al menos 6 caracteres');return;}
-  if(pass!==pass2){showAuthMsg('Las contraseñas no coinciden');return;}
-  if(DB.users.find(u=>u.email===email)){showAuthMsg('Ese correo ya está registrado');return;}
-  const nu={id:uid(),email,password:pass,name,role:'user',verified:false,banned:false,banReason:'',createdAt:new Date().toISOString(),profilePic:null,profilePicApproved:true};
-  const arr=DB.users; arr.push(nu); DB.users=arr;
-  // Welcome email
+  if(!name||!email||!pass){authMsg('Completa todos los campos');return;}
+  if(!email.includes('@')){authMsg('Correo inválido');return;}
+  if(pass.length<6){authMsg('La contraseña debe tener mínimo 6 caracteres');return;}
+  if(pass!==pass2){authMsg('Las contraseñas no coinciden');return;}
+  if(DB.users.find(u=>u.email===email)){authMsg('Ese correo ya está registrado');return;}
+  const nu={id:uid(),email,password:pass,name,role:'user',verified:false,banned:false,banReason:'',createdAt:new Date().toISOString(),profilePic:null,profilePicApproved:true,bio:'',lastSeen:new Date().toISOString()};
+  const arr=DB.users;arr.push(nu);DB.users=arr;
   const em=DB.emails;
-  em.push({id:uid(),from:'bienvenida@zmail.com',fromName:'ZMail',to:email,subject:'¡Bienvenido a ZMail, '+name+'!',body:'Hola '+name+',\n\nTu cuenta ha sido creada exitosamente. Ahora puedes enviar y recibir correos en tiempo real.\n\nPara obtener la insignia de verificado ✓, un administrador revisará tu cuenta.\n\n¡Gracias por unirte a ZMail!',date:new Date().toISOString(),read:false,folder:'inbox',important:true,starred:false});
+  em.push({id:uid(),from:'bienvenida@zmail.com',fromName:'ZMail',to:email,subject:'¡Bienvenido a ZMail, '+name+'!',body:'Hola '+name+',\n\nTu cuenta ha sido creada. Ahora puedes enviar y recibir correos.\n\nPara obtener la insignia verificada azul, un administrador revisará tu cuenta.\n\n¡Gracias por unirte a ZMail!',date:new Date().toISOString(),read:false,folder:'inbox',important:true,starred:false});
   DB.emails=em;
-  CU=nu; route();
+  CU=nu;prevAdminShares=[...DB.adminShares];prevBanState=false;prevVerified=false;route();
 };
 
 // ══════════════════════════════════
@@ -917,180 +627,240 @@ document.getElementById('do-register').onclick=()=>{
 // ══════════════════════════════════
 function showAppScreen(){
   showScreen('app-screen');
-  // sysdown banner for admins
   const banner=document.getElementById('sysdown-admin-banner');
-  if(DB.settings.systemDown && isAdmin(CU)){ banner.classList.remove('hidden'); document.getElementById('app-screen').classList.add('has-sysdown'); }
-  else{ banner.classList.add('hidden'); document.getElementById('app-screen').classList.remove('has-sysdown'); }
-
-  // topbar avatar
-  const ab=document.getElementById('avatar-topbar-btn');
-  ab.style.background=color(CU.email);
-  if(CU.profilePic&&CU.profilePicApproved){ ab.innerHTML=`<img src="${CU.profilePic}" style="width:38px;height:38px;border-radius:50%;object-fit:cover">`; }
-  else ab.textContent=initials(CU.name);
-
-  // admin button
-  document.getElementById('goto-admin-btn').style.display=isAdmin(CU)?'flex':'none';
-
+  if(DB.settings.systemDown&&isAdmin(CU)){banner.classList.remove('hidden');document.getElementById('app-screen').style.paddingTop='38px';}
+  else{banner.classList.add('hidden');document.getElementById('app-screen').style.paddingTop='';}
+  const s=DB.settings;
+  if(s.announcementActive&&s.announcement){
+    document.getElementById('announce-text').textContent=s.announcement;
+    document.getElementById('announce-banner').classList.remove('hidden');
+  }
+  updateTopbarAva();
+  const ab=document.getElementById('goto-admin-btn');
+  ab.classList.toggle('hidden',!isAdmin(CU));
   updateSidebarCounts();
-  renderEmailList();
+  if(currentFolder==='profile-page')renderProfilePage();
+  else renderEmailList();
   setupAppEvents();
+}
+
+function updateTopbarAva(){
+  const ab=document.getElementById('ava-topbar');
+  const fresh=getUByEmail(CU.email)||CU;
+  ab.style.background=clr(fresh.email);
+  if(fresh.profilePic&&fresh.profilePicApproved)ab.innerHTML=`<img src="${fresh.profilePic}" style="width:38px;height:38px;border-radius:50%;object-fit:cover">`;
+  else ab.textContent=initials(fresh.name);
 }
 
 function updateSidebarCounts(){
   const unread=DB.emails.filter(e=>e.to===CU.email&&e.folder==='inbox'&&!e.read).length;
   const drafts=DB.emails.filter(e=>e.from===CU.email&&e.folder==='draft').length;
-  document.getElementById('inbox-count').textContent=unread||'';
-  document.getElementById('draft-count').textContent=drafts||'';
+  const ic=document.getElementById('inbox-count'),dc=document.getElementById('draft-count');
+  if(ic)ic.textContent=unread||'';
+  if(dc)dc.textContent=drafts||'';
 }
 
 function getEmails(){
-  let emails=[];
-  if(currentFolder==='inbox') emails=DB.emails.filter(e=>e.to===CU.email&&e.folder==='inbox');
-  else if(currentFolder==='sent') emails=DB.emails.filter(e=>e.from===CU.email&&e.folder==='sent');
-  else if(currentFolder==='drafts') emails=DB.emails.filter(e=>e.from===CU.email&&e.folder==='draft');
-  else if(currentFolder==='trash') emails=DB.emails.filter(e=>e.to===CU.email&&e.folder==='trash');
-  else if(currentFolder==='starred') emails=DB.emails.filter(e=>(e.to===CU.email||e.from===CU.email)&&e.starred);
-  else if(currentFolder==='important') emails=DB.emails.filter(e=>e.to===CU.email&&e.important);
-  if(searchQ){
-    const q=searchQ.toLowerCase();
-    emails=emails.filter(e=>e.subject.toLowerCase().includes(q)||e.body.toLowerCase().includes(q)||(e.fromName||'').toLowerCase().includes(q)||e.from.toLowerCase().includes(q)||(e.to||'').toLowerCase().includes(q));
-  }
-  return emails.sort((a,b)=>new Date(b.date)-new Date(a.date));
+  let em=[];
+  if(currentFolder==='inbox')em=DB.emails.filter(e=>e.to===CU.email&&e.folder==='inbox');
+  else if(currentFolder==='sent')em=DB.emails.filter(e=>e.from===CU.email&&e.folder==='sent');
+  else if(currentFolder==='drafts')em=DB.emails.filter(e=>e.from===CU.email&&e.folder==='draft');
+  else if(currentFolder==='trash')em=DB.emails.filter(e=>e.to===CU.email&&e.folder==='trash');
+  else if(currentFolder==='starred')em=DB.emails.filter(e=>(e.to===CU.email||e.from===CU.email)&&e.starred);
+  else if(currentFolder==='important')em=DB.emails.filter(e=>e.to===CU.email&&e.important);
+  if(searchQ){const q=searchQ.toLowerCase();em=em.filter(e=>e.subject.toLowerCase().includes(q)||e.body.toLowerCase().includes(q)||(e.fromName||'').toLowerCase().includes(q)||e.from.toLowerCase().includes(q));}
+  return em.sort((a,b)=>new Date(b.date)-new Date(a.date));
 }
 
 const folderNames={inbox:'Recibidos',sent:'Enviados',drafts:'Borradores',trash:'Papelera',starred:'Destacados',important:'Importantes'};
 
 function renderEmailList(){
-  const pane=document.getElementById('email-list-pane');
+  const pane=document.getElementById('email-list-pane');if(!pane)return;
   const emails=getEmails();
   let html=`<div class="list-header"><span class="list-title">${folderNames[currentFolder]||''}</span><span class="list-count">${emails.length} mensaje${emails.length!==1?'s':''}</span></div>`;
-  if(!emails.length){
-    html+=`<div class="empty-state"><div class="empty-icon">📭</div><div class="empty-text">No hay mensajes aquí</div></div>`;
-  } else {
+  if(!emails.length){html+=`<div class="empty-state"><div class="empty-icon">📭</div><div class="empty-text">No hay mensajes aquí</div></div>`;}
+  else{
     emails.forEach(e=>{
-      const senderUser=getUserByEmail(e.from);
-      const pic=senderUser?.profilePic; const picOk=senderUser?.profilePicApproved;
-      const isUnread=!e.read&&e.to===CU.email;
-      const isSelected=selectedEmailId===e.id;
-      const showVerified=senderUser?.verified&&searchQ;
-      html+=`<div class="email-row${isUnread?' unread':''}${isSelected?' selected':''}" data-eid="${e.id}">
-        <div class="email-avatar-sm" style="background:${color(e.from)}">${avatarHtml(e.fromName||e.from,e.from,pic,picOk,38,13)}</div>
-        <div class="email-info">
-          <div class="email-sender-row">
-            <span class="email-sender-name">${e.fromName||e.from}</span>
-            ${e.important?`<span style="font-size:13px">🔖</span>`:''}
-            ${showVerified?`<span class="verify-row-badge">✓</span>`:''}
+      const su=getUByEmail(e.from);
+      html+=`<div class="email-row${!e.read&&e.to===CU.email?' unread':''}${selectedEmailId===e.id?' selected':''}" data-eid="${e.id}">
+        <div class="ava-sm" style="background:${clr(e.from)}">${avaHtml(e.fromName||e.from,e.from,su?.profilePic,su?.profilePicApproved,38,13)}</div>
+        <div class="einfo">
+          <div class="esender-row">
+            <span class="esender">${e.fromName||e.from}</span>
+            ${su?.verified?vBadge():''}
+            ${e.important?`<span style="font-size:12px">🔖</span>`:''}
           </div>
-          <div class="email-subject-line">${e.subject} <span class="email-preview-text">— ${e.body.replace(/\n/g,' ').slice(0,55)}...</span></div>
+          <div class="esubj">${e.subject} <span class="eprev">— ${e.body.replace(/\n/g,' ').slice(0,50)}...</span></div>
         </div>
-        <span class="star-icon" data-star="${e.id}">${e.starred?'⭐':'☆'}</span>
-        <span class="email-date-col">${timeAgo(e.date)}</span>
+        <span class="star-btn" data-star="${e.id}">${e.starred?'⭐':'☆'}</span>
+        <span class="edate">${timeAgo(e.date)}</span>
       </div>`;
     });
   }
   pane.innerHTML=html;
-  // events
-  pane.querySelectorAll('.email-row').forEach(row=>{
-    row.onclick=()=>openEmail(row.dataset.eid);
-  });
-  pane.querySelectorAll('.star-icon').forEach(btn=>{
-    btn.onclick=e=>{e.stopPropagation();toggleStar(btn.dataset.star);};
-  });
+  pane.querySelectorAll('.email-row').forEach(row=>row.onclick=()=>openEmail(row.dataset.eid));
+  pane.querySelectorAll('.star-btn').forEach(btn=>btn.onclick=e=>{e.stopPropagation();toggleStar(btn.dataset.star);});
 }
 
 function openEmail(eid){
-  const em=DB.emails.find(e=>e.id===eid); if(!em) return;
-  if(!em.read&&em.to===CU.email){ em.read=true; DB.emails=DB.emails; /* trigger setter */ const arr=DB.emails; const i=arr.findIndex(x=>x.id===eid); if(i>-1){arr[i].read=true;DB.emails=arr;} }
+  const em=DB.emails.find(e=>e.id===eid);if(!em)return;
+  if(!em.read&&em.to===CU.email){const arr=DB.emails;const i=arr.findIndex(x=>x.id===eid);if(i>-1){arr[i].read=true;DB.emails=arr;}}
   selectedEmailId=eid;
   const vp=document.getElementById('email-viewer-pane');
-  vp.style.display='flex';
-  vp.style.flexDirection='column';
-  const senderUser=getUserByEmail(em.from);
-  const pic=senderUser?.profilePic; const picOk=senderUser?.profilePicApproved;
+  vp.style.display='flex';vp.style.flexDirection='column';
+  const su=getUByEmail(em.from);
   vp.innerHTML=`<div class="email-viewer">
     <div class="viewer-toolbar">
-      <button class="tool-btn" id="vw-back" title="Volver">←</button>
-      <button class="tool-btn" id="vw-trash" title="Papelera">🗑️</button>
-      <button class="tool-btn" id="vw-star" title="Destacar">${em.starred?'⭐':'☆'}</button>
-      <button class="tool-btn" id="vw-important" title="Importante">${em.important?'🔖':'🏷️'}</button>
-      ${em.folder==='trash'?`<button class="tool-btn" id="vw-restore" title="Restaurar">↩️</button>`:''}
+      <button class="tool-btn" id="vw-back">←</button>
+      <button class="tool-btn" id="vw-trash">🗑️</button>
+      <button class="tool-btn" id="vw-star">${em.starred?'⭐':'☆'}</button>
+      <button class="tool-btn" id="vw-important">${em.important?'🔖':'🏷️'}</button>
+      ${em.folder==='trash'?`<button class="tool-btn" id="vw-restore">↩️</button>`:''}
+      <button class="tool-btn" id="vw-print">🖨️</button>
     </div>
     <div class="viewer-subject">${em.subject}</div>
     <div class="viewer-meta">
-      <div class="viewer-avatar" style="background:${color(em.from)}">${avatarHtml(em.fromName||em.from,em.from,pic,picOk,42,16)}</div>
+      <div class="viewer-ava" style="background:${clr(em.from)}">${avaHtml(em.fromName||em.from,em.from,su?.profilePic,su?.profilePicApproved,42,16)}</div>
       <div>
-        <div class="viewer-from-name">${em.fromName||em.from} ${senderUser?.verified?`<span style="color:var(--z-blue);font-size:13px">✓ Verificado</span>`:''}</div>
-        <div class="viewer-from-detail">De: ${em.from} · Para: ${em.to}</div>
-        <div class="viewer-from-detail">${new Date(em.date).toLocaleString('es-CO',{weekday:'short',year:'numeric',month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'})}</div>
+        <div class="viewer-from-name">${em.fromName||em.from} ${su?.verified?vBadge('lg'):''}</div>
+        <div class="viewer-detail">De: ${em.from} · Para: ${em.to}</div>
+        <div class="viewer-detail">${new Date(em.date).toLocaleString('es-CO',{weekday:'short',year:'numeric',month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'})}</div>
       </div>
     </div>
     <div class="viewer-body">${em.body.replace(/\n/g,'<br>')}</div>
     <div class="reply-section">
-      <button class="reply-btn-pill" id="vw-reply">↩ Responder</button>
-      <button class="reply-btn-pill" id="vw-forward">→ Reenviar</button>
+      <button class="reply-pill" id="vw-reply">↩ Responder</button>
+      <button class="reply-pill" id="vw-forward">→ Reenviar</button>
     </div>
   </div>`;
-  document.getElementById('vw-back').onclick=()=>{ selectedEmailId=null; vp.style.display='none'; renderEmailList(); updateSidebarCounts(); };
+  document.getElementById('vw-back').onclick=()=>{selectedEmailId=null;vp.style.display='none';renderEmailList();updateSidebarCounts();};
   document.getElementById('vw-trash').onclick=()=>moveEmail(eid,'trash');
-  document.getElementById('vw-star').onclick=()=>{ toggleStar(eid); openEmail(eid); };
-  document.getElementById('vw-important').onclick=()=>{ toggleImportant(eid); openEmail(eid); };
+  document.getElementById('vw-star').onclick=()=>{toggleStar(eid);openEmail(eid);};
+  document.getElementById('vw-important').onclick=()=>{toggleImportant(eid);openEmail(eid);};
   document.getElementById('vw-restore')?.addEventListener('click',()=>moveEmail(eid,'inbox'));
-  document.getElementById('vw-reply').onclick=()=>{ openCompose(em.from,'Re: '+em.subject); };
-  document.getElementById('vw-forward').onclick=()=>{ openCompose('','Fwd: '+em.subject,'\n\n--- Mensaje reenviado ---\nDe: '+em.from+'\n'+em.body); };
-  renderEmailList();
-  updateSidebarCounts();
+  document.getElementById('vw-print').onclick=()=>window.print();
+  document.getElementById('vw-reply').onclick=()=>openCompose(em.from,'Re: '+em.subject);
+  document.getElementById('vw-forward').onclick=()=>openCompose('','Fwd: '+em.subject,'\n\n--- Mensaje reenviado ---\nDe: '+em.from+'\n'+em.body);
+  renderEmailList();updateSidebarCounts();
 }
 
-function moveEmail(eid, folder){
-  const arr=DB.emails; const i=arr.findIndex(e=>e.id===eid);
-  if(i>-1){ arr[i].folder=folder; DB.emails=arr; }
-  selectedEmailId=null;
-  document.getElementById('email-viewer-pane').style.display='none';
-  showToast(folder==='trash'?'🗑️ Movido a papelera':'↩️ Restaurado en Recibidos');
-  renderEmailList(); updateSidebarCounts();
+function moveEmail(eid,folder){
+  const arr=DB.emails;const i=arr.findIndex(e=>e.id===eid);
+  if(i>-1){arr[i].folder=folder;DB.emails=arr;}
+  selectedEmailId=null;document.getElementById('email-viewer-pane').style.display='none';
+  toast(folder==='trash'?'🗑️ Movido a papelera':'↩️ Restaurado');
+  renderEmailList();updateSidebarCounts();
 }
-function toggleStar(eid){
-  const arr=DB.emails; const i=arr.findIndex(e=>e.id===eid);
-  if(i>-1){ arr[i].starred=!arr[i].starred; DB.emails=arr; }
-  renderEmailList();
-}
-function toggleImportant(eid){
-  const arr=DB.emails; const i=arr.findIndex(e=>e.id===eid);
-  if(i>-1){ arr[i].important=!arr[i].important; DB.emails=arr; }
+function toggleStar(eid){const arr=DB.emails;const i=arr.findIndex(e=>e.id===eid);if(i>-1){arr[i].starred=!arr[i].starred;DB.emails=arr;}renderEmailList();}
+function toggleImportant(eid){const arr=DB.emails;const i=arr.findIndex(e=>e.id===eid);if(i>-1){arr[i].important=!arr[i].important;DB.emails=arr;}}
+
+// ── PROFILE PAGE ──
+function renderProfilePage(){
+  const pane=document.getElementById('email-list-pane');if(!pane)return;
+  const fresh=getUByEmail(CU.email)||CU;
+  const sentC=DB.emails.filter(e=>e.from===CU.email&&e.folder==='sent').length;
+  const recvC=DB.emails.filter(e=>e.to===CU.email&&e.folder==='inbox').length;
+  const unrC=DB.emails.filter(e=>e.to===CU.email&&!e.read&&e.folder==='inbox').length;
+  pane.innerHTML=`<div class="profile-page">
+    <div style="display:flex;align-items:center;gap:24px;margin-bottom:32px;flex-wrap:wrap">
+      <div class="profile-big-ava" style="background:${clr(CU.email)}" id="profile-page-ava">
+        ${fresh.profilePic&&fresh.profilePicApproved?`<img src="${fresh.profilePic}">`:`<span>${initials(fresh.name)}</span>`}
+        <div class="pfp-hover">Cambiar<br>foto</div>
+      </div>
+      <input type="file" id="pfp-page-input" accept="image/*">
+      <div>
+        <div style="font-size:24px;font-weight:500;display:flex;align-items:center;gap:8px;flex-wrap:wrap">${fresh.name} ${fresh.verified?vBadge('xl'):''}</div>
+        <div style="font-size:14px;color:var(--txt3);margin-top:4px">${fresh.email}</div>
+        ${fresh.verified?`<div class="pdd-vbadge" style="margin-top:8px">${vBadge()} Cuenta verificada</div>`:`<div style="margin-top:8px;font-size:13px;color:var(--txt3)">⏳ Sin verificar — espera aprobación del admin</div>`}
+      </div>
+    </div>
+    <div class="adm-card" style="box-shadow:var(--sh)">
+      <div style="font-size:15px;font-weight:600;margin-bottom:14px">Información</div>
+      <div class="info-row"><span class="info-lbl">Nombre</span><span class="info-val">${fresh.name}</span></div>
+      <div class="info-row"><span class="info-lbl">Correo</span><span class="info-val">${fresh.email}</span></div>
+      <div class="info-row"><span class="info-lbl">Miembro desde</span><span class="info-val">${new Date(fresh.createdAt).toLocaleDateString('es-CO',{year:'numeric',month:'long',day:'numeric'})}</span></div>
+      <div class="info-row"><span class="info-lbl">Estado</span><span class="info-val"><span class="badge b-green">✓ Activo</span></span></div>
+      <div class="info-row"><span class="info-lbl">Rol</span><span class="info-val"><span class="badge ${isAdmin(fresh)?'b-purple':'b-gray'}">${fresh.role==='admin'?'Super Admin':isAdmin(fresh)?'Administrador':'Usuario'}</span></span></div>
+    </div>
+    <div class="adm-card" style="box-shadow:var(--sh)">
+      <div style="font-size:15px;font-weight:600;margin-bottom:14px">Estadísticas</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px">
+        <div style="background:var(--sur2);border-radius:var(--rs);padding:16px;text-align:center"><div style="font-size:24px;font-weight:600;color:var(--blue)">${sentC}</div><div style="font-size:12px;color:var(--txt3);margin-top:4px">Enviados</div></div>
+        <div style="background:var(--sur2);border-radius:var(--rs);padding:16px;text-align:center"><div style="font-size:24px;font-weight:600;color:var(--green)">${recvC}</div><div style="font-size:12px;color:var(--txt3);margin-top:4px">Recibidos</div></div>
+        <div style="background:var(--sur2);border-radius:var(--rs);padding:16px;text-align:center"><div style="font-size:24px;font-weight:600;color:var(--red)">${unrC}</div><div style="font-size:12px;color:var(--txt3);margin-top:4px">Sin leer</div></div>
+      </div>
+    </div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap">
+      <button class="btn-xs btn-ob" id="change-pass-btn" style="padding:10px 20px;font-size:13px">🔑 Cambiar contraseña</button>
+      <button class="btn-xs btn-og" onclick="logout()" style="padding:10px 20px;font-size:13px">🚪 Cerrar sesión</button>
+    </div>
+  </div>`;
+  document.getElementById('profile-page-ava').onclick=()=>document.getElementById('pfp-page-input').click();
+  document.getElementById('pfp-page-input').onchange=e=>uploadPFP(e);
+  document.getElementById('change-pass-btn').onclick=()=>{
+    showModal(`<div class="modal-box">
+      <div class="modal-title">🔑 Cambiar contraseña</div>
+      <input class="modal-input" type="password" id="old-pass" placeholder="Contraseña actual">
+      <input class="modal-input" type="password" id="new-pass" placeholder="Nueva contraseña">
+      <input class="modal-input" type="password" id="new-pass2" placeholder="Confirmar nueva contraseña">
+      <div class="modal-btns">
+        <button class="btn-xs btn-og" onclick="closeModal()">Cancelar</button>
+        <button class="btn-xs btn-ob" id="confirm-cp">Guardar</button>
+      </div>
+    </div>`);
+    document.getElementById('confirm-cp').onclick=()=>{
+      const op=document.getElementById('old-pass').value;
+      const np=document.getElementById('new-pass').value;
+      const np2=document.getElementById('new-pass2').value;
+      const arr=DB.users;const i=arr.findIndex(u=>u.id===CU.id);
+      if(arr[i].password!==op){toast('⚠️ Contraseña actual incorrecta');return;}
+      if(np.length<6){toast('⚠️ Mínimo 6 caracteres');return;}
+      if(np!==np2){toast('⚠️ Las contraseñas no coinciden');return;}
+      arr[i].password=np;DB.users=arr;CU.password=np;
+      closeModal();toast('✓ Contraseña actualizada');
+    };
+  };
 }
 
 function setupAppEvents(){
-  // nav items
   document.querySelectorAll('.nav-item[data-folder]').forEach(el=>{
     el.onclick=()=>{
-      currentFolder=el.dataset.folder; searchQ='';
+      currentFolder=el.dataset.folder;searchQ='';
       document.getElementById('search-input').value='';
       document.querySelectorAll('.nav-item').forEach(x=>x.classList.remove('active'));
       el.classList.add('active');
-      selectedEmailId=null;
-      document.getElementById('email-viewer-pane').style.display='none';
-      renderEmailList(); updateSidebarCounts();
+      selectedEmailId=null;document.getElementById('email-viewer-pane').style.display='none';
+      if(currentFolder==='profile-page')renderProfilePage();
+      else renderEmailList();
+      updateSidebarCounts();
     };
   });
   document.getElementById('logo-home').onclick=()=>{
-    currentFolder='inbox'; searchQ='';
-    document.getElementById('search-input').value='';
+    currentFolder='inbox';searchQ='';document.getElementById('search-input').value='';
     document.querySelectorAll('.nav-item').forEach(x=>x.classList.remove('active'));
     document.querySelector('.nav-item[data-folder="inbox"]').classList.add('active');
-    selectedEmailId=null; document.getElementById('email-viewer-pane').style.display='none';
-    renderEmailList(); updateSidebarCounts();
+    selectedEmailId=null;document.getElementById('email-viewer-pane').style.display='none';
+    renderEmailList();updateSidebarCounts();
   };
-  document.getElementById('search-input').oninput=e=>{ searchQ=e.target.value; renderEmailList(); };
+  document.getElementById('search-input').oninput=e=>{searchQ=e.target.value;renderEmailList();};
   document.getElementById('compose-btn').onclick=()=>openCompose();
-  document.getElementById('goto-admin-btn').onclick=()=>{ CU._viewAdmin=true; showAdminScreen(); };
-  // avatar dropdown
-  document.getElementById('avatar-topbar-btn').onclick=e=>{ e.stopPropagation(); updateProfileDD(); document.getElementById('profile-dropdown').classList.toggle('hidden'); };
-  document.addEventListener('click',()=>document.getElementById('profile-dropdown')?.classList.add('hidden'));
-  document.getElementById('dd-logout').onclick=()=>logout();
-  // pfp
-  document.getElementById('profile-pic-wrap').onclick=()=>document.getElementById('pfp-file-input').click();
-  document.getElementById('pfp-file-input').onchange=e=>uploadPFP(e);
-  // compose events (static)
+  document.getElementById('goto-admin-btn').onclick=()=>{
+    document.getElementById('admin-notif-dot').classList.add('hidden');
+    CU._viewAdmin=true;showAdminScreen();
+  };
+  document.getElementById('ava-topbar').onclick=e=>{e.stopPropagation();updateProfileDD();document.getElementById('profile-dd').classList.toggle('hidden');};
+  document.addEventListener('click',()=>document.getElementById('profile-dd')?.classList.add('hidden'));
+  document.getElementById('dd-logout').onclick=logout;
+  document.getElementById('dd-profile').onclick=()=>{
+    currentFolder='profile-page';
+    document.querySelectorAll('.nav-item').forEach(x=>x.classList.remove('active'));
+    document.querySelector('.nav-item[data-folder="profile-page"]').classList.add('active');
+    selectedEmailId=null;document.getElementById('email-viewer-pane').style.display='none';
+    renderProfilePage();document.getElementById('profile-dd').classList.add('hidden');
+  };
+  document.getElementById('dd-settings').onclick=()=>toast('⚙️ Configuración próximamente');
+  document.getElementById('pfp-wrap').onclick=()=>document.getElementById('pfp-input').click();
+  document.getElementById('pfp-input').onchange=e=>uploadPFP(e);
   document.getElementById('compose-close').onclick=()=>document.getElementById('compose-modal').classList.add('hidden');
   document.getElementById('discard-btn').onclick=()=>document.getElementById('compose-modal').classList.add('hidden');
   document.getElementById('save-draft-btn').onclick=saveDraft;
@@ -1098,72 +868,66 @@ function setupAppEvents(){
 }
 
 function updateProfileDD(){
-  refreshUser();
-  const dd=document.getElementById('profile-dropdown');
-  document.getElementById('dd-name').textContent=CU.name;
-  document.getElementById('dd-email').textContent=CU.email;
-  document.getElementById('dd-verified').innerHTML=CU.verified?`<span class="verified-badge">✓ Cuenta verificada</span>`:'';
-  const pw=document.getElementById('profile-pic-wrap');
-  pw.style.background=color(CU.email);
-  if(CU.profilePic&&CU.profilePicApproved) pw.innerHTML=`<img src="${CU.profilePic}"><div class="pic-overlay">Cambiar<br>foto</div>`;
-  else pw.innerHTML=`<span style="font-size:26px;font-weight:600;color:#fff">${initials(CU.name)}</span><div class="pic-overlay">Cambiar<br>foto</div>`;
+  const fresh=getUByEmail(CU.email)||CU;
+  document.getElementById('dd-name').textContent=fresh.name;
+  document.getElementById('dd-email').textContent=fresh.email;
+  const vw=document.getElementById('dd-v-wrap');
+  vw.innerHTML=fresh.verified?`<div class="pdd-vbadge">${vBadge()} Cuenta verificada</div>`:'';
+  const pw=document.getElementById('pfp-wrap');
+  pw.style.background=clr(fresh.email);
+  if(fresh.profilePic&&fresh.profilePicApproved)pw.innerHTML=`<img src="${fresh.profilePic}"><div class="pfp-hover">Cambiar<br>foto</div>`;
+  else pw.innerHTML=`<span style="font-size:26px;font-weight:600;color:#fff">${initials(fresh.name)}</span><div class="pfp-hover">Cambiar<br>foto</div>`;
 }
 
 function uploadPFP(e){
-  const file=e.target.files[0]; if(!file) return;
+  const file=e.target.files[0];if(!file)return;
   const reader=new FileReader();
   reader.onload=re=>{
     const reqs=DB.pfpReqs;
-    if(reqs.find(r=>r.userId===CU.id&&r.status==='pending')){showToast('⏳ Ya tienes una solicitud pendiente');return;}
+    if(reqs.find(r=>r.userId===CU.id&&r.status==='pending')){toast('⏳ Ya tienes una solicitud pendiente');return;}
     reqs.push({id:uid(),userId:CU.id,userEmail:CU.email,userName:CU.name,imageData:re.target.result,status:'pending',date:new Date().toISOString()});
-    DB.pfpReqs=reqs;
-    showToast('📸 Foto enviada para aprobación del admin');
+    DB.pfpReqs=reqs;toast('📸 Foto enviada para aprobación del admin');
   };
-  reader.readAsDataURL(file);
-  e.target.value='';
+  reader.readAsDataURL(file);e.target.value='';
 }
 
 function openCompose(to='',subject='',body=''){
-  const cm=document.getElementById('compose-modal');
-  cm.classList.remove('hidden');
+  const cm=document.getElementById('compose-modal');cm.classList.remove('hidden');
   document.getElementById('cm-to').value=to;
+  document.getElementById('cm-cc').value='';
   document.getElementById('cm-subject').value=subject;
   document.getElementById('cm-body').value=body;
-  if(!to) document.getElementById('cm-to').focus();
-  else document.getElementById('cm-body').focus();
+  setTimeout(()=>{if(!to)document.getElementById('cm-to').focus();else document.getElementById('cm-body').focus();},50);
 }
 
 function sendEmail(){
   const to=document.getElementById('cm-to').value.trim();
   const subject=document.getElementById('cm-subject').value.trim()||'(Sin asunto)';
   const body=document.getElementById('cm-body').value.trim();
-  if(!to){showToast('⚠️ Ingresa un destinatario');return;}
-  const recipient=getUserByEmail(to);
-  if(!recipient){showToast('⚠️ Ese correo no existe en ZMail');return;}
-  if(recipient.banned){showToast('⚠️ No puedes enviar correos a ese usuario');return;}
+  if(!to){toast('⚠️ Ingresa un destinatario');return;}
+  const recipient=getUByEmail(to);
+  if(!recipient){toast('⚠️ Ese correo no existe en ZMail');return;}
+  if(recipient.banned){toast('⚠️ No puedes enviar correos a ese usuario');return;}
   const arr=DB.emails;
-  const emailData={id:uid(),from:CU.email,fromName:CU.name,to,subject,body,date:new Date().toISOString(),read:false,folder:'inbox',important:false,starred:false};
-  arr.push(emailData);
-  arr.push({...emailData,id:uid(),to,folder:'sent',read:true});
+  const base={id:uid(),from:CU.email,fromName:CU.name,to,subject,body,date:new Date().toISOString(),read:false,folder:'inbox',important:false,starred:false};
+  arr.push(base);
+  arr.push({...base,id:uid(),folder:'sent',read:true});
   DB.emails=arr;
   document.getElementById('compose-modal').classList.add('hidden');
-  showToast(`✓ Correo enviado a ${to}`);
-  renderEmailList(); updateSidebarCounts();
-  // Simulated real-time notification for sender
-  if(to===CU.email) setTimeout(()=>showToast('📨 Nuevo correo en tu bandeja'),300);
+  toast(`✓ Correo enviado a ${to}`);
+  renderEmailList();updateSidebarCounts();
 }
 
 function saveDraft(){
   const to=document.getElementById('cm-to').value.trim();
   const subject=document.getElementById('cm-subject').value.trim();
   const body=document.getElementById('cm-body').value.trim();
-  if(!subject&&!body){showToast('⚠️ El borrador está vacío');return;}
+  if(!subject&&!body){toast('⚠️ El borrador está vacío');return;}
   const arr=DB.emails;
   arr.push({id:uid(),from:CU.email,fromName:CU.name,to:to||'',subject:subject||'(Sin asunto)',body,date:new Date().toISOString(),read:true,folder:'draft',important:false,starred:false});
   DB.emails=arr;
   document.getElementById('compose-modal').classList.add('hidden');
-  showToast('💾 Borrador guardado');
-  renderEmailList(); updateSidebarCounts();
+  toast('💾 Borrador guardado');renderEmailList();updateSidebarCounts();
 }
 
 // ══════════════════════════════════
@@ -1171,73 +935,72 @@ function saveDraft(){
 // ══════════════════════════════════
 function showAdminScreen(){
   showScreen('admin-screen');
+  const pending=DB.pfpReqs.filter(r=>r.status==='pending').length;
+  const pb=document.getElementById('pfp-badge');if(pb)pb.textContent=pending||'';
   document.querySelectorAll('.adm-nav[data-adm]').forEach(el=>{
-    el.onclick=()=>{ admSection=el.dataset.adm; document.querySelectorAll('.adm-nav[data-adm]').forEach(x=>x.classList.remove('active')); el.classList.add('active'); renderAdmContent(); };
+    el.onclick=()=>{admSection=el.dataset.adm;document.querySelectorAll('.adm-nav[data-adm]').forEach(x=>x.classList.remove('active'));el.classList.add('active');renderAdmContent();};
   });
-  document.getElementById('back-to-mail').onclick=()=>{ CU._viewAdmin=false; showAppScreen(); };
+  document.getElementById('back-to-mail').onclick=()=>{CU._viewAdmin=false;showAppScreen();};
   renderAdmContent();
 }
 
 function renderAdmContent(){
   const c=document.getElementById('adm-content');
-  const titles={dashboard:'Dashboard',users:'Gestión de usuarios',emails:'Todos los correos',pfp:'Fotos pendientes',admins:'Administradores',system:'Configuración del sistema',logs:'Registros de actividad'};
-  let html=`<div class="adm-topbar"><h1 class="adm-page-title">${titles[admSection]}</h1><div class="adm-status"><span class="live-dot"></span> En vivo · ${CU.email}</div></div>`;
-  html+=admSections[admSection]();
+  const titles={dashboard:'Dashboard',users:'Gestión de usuarios',emails:'Todos los correos',pfp:'Fotos pendientes',admins:'Administradores',news:'Blog de noticias',announce:'Anuncios',system:'Configuración del sistema',logs:'Registros de actividad'};
+  let html=`<div class="adm-topbar"><h1 class="adm-page-title">${titles[admSection]||admSection}</h1><div class="adm-status"><span class="live-dot"></span>En vivo · ${CU.email}</div></div>`;
+  html+=admSections[admSection]?.()??'';
   c.innerHTML=html;
   admSectionEvents[admSection]?.();
 }
 
-const admSections = {
+const admSections={
   dashboard(){
-    const users=DB.users.filter(u=>u.role!=='admin');
-    const totalUsers=DB.users.length;
-    const verified=DB.users.filter(u=>u.verified).length;
-    const banned=DB.users.filter(u=>u.banned).length;
-    const totalEmails=DB.emails.length;
-    const recent=DB.emails.slice().sort((a,b)=>new Date(b.date)-new Date(a.date)).slice(0,6);
-    return `<div class="stat-grid">
-      <div class="stat-card"><div class="stat-num" style="color:var(--z-blue)">${totalUsers}</div><div class="stat-label">Usuarios totales</div></div>
-      <div class="stat-card"><div class="stat-num" style="color:var(--z-green)">${verified}</div><div class="stat-label">Verificados</div></div>
-      <div class="stat-card"><div class="stat-num" style="color:var(--z-red)">${banned}</div><div class="stat-label">Baneados</div></div>
-      <div class="stat-card"><div class="stat-num" style="color:var(--z-purple)">${totalEmails}</div><div class="stat-label">Correos totales</div></div>
+    const recent=DB.emails.slice().sort((a,b)=>new Date(b.date)-new Date(a.date)).slice(0,8);
+    return`<div class="stat-grid">
+      <div class="stat-card"><div class="stat-num" style="color:var(--blue)">${DB.users.length}</div><div class="stat-label">Usuarios</div></div>
+      <div class="stat-card"><div class="stat-num" style="color:var(--green)">${DB.users.filter(u=>u.verified).length}</div><div class="stat-label">Verificados</div></div>
+      <div class="stat-card"><div class="stat-num" style="color:var(--red)">${DB.users.filter(u=>u.banned).length}</div><div class="stat-label">Baneados</div></div>
+      <div class="stat-card"><div class="stat-num" style="color:var(--purple)">${DB.emails.length}</div><div class="stat-label">Correos</div></div>
     </div>
     <div class="adm-card">
       <div class="adm-card-title">Actividad reciente</div>
-      ${recent.map(e=>`<div class="activity-row">
-        <div class="activity-ava" style="background:${color(e.from)}">${initials(e.fromName||e.from)}</div>
-        <div class="activity-info">
-          <div class="activity-main">${e.fromName||e.from} → ${e.to}: <b>${e.subject}</b></div>
-          <div class="activity-sub">${e.body.slice(0,60)}...</div>
+      ${recent.map(e=>`<div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid #f1f3f4">
+        <div style="width:34px;height:34px;border-radius:50%;background:${clr(e.from)};color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;flex-shrink:0">${initials(e.fromName||e.from)}</div>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${e.fromName||e.from} → ${e.to}: <b>${e.subject}</b></div>
+          <div style="font-size:12px;color:var(--txt3)">${e.body.slice(0,55)}</div>
         </div>
-        <span class="activity-time">${timeAgo(e.date)}</span>
+        <span style="font-size:11px;color:var(--txt3);flex-shrink:0">${timeAgo(e.date)}</span>
       </div>`).join('')}
     </div>`;
   },
   users(){
-    const users=DB.users;
-    return `<div class="adm-card">
-      <div class="adm-card-title">Todos los usuarios (${users.length})</div>
+    return`<div class="adm-card">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap">
+        <div class="adm-card-title" style="margin:0">Usuarios (${DB.users.length})</div>
+        <input id="user-search" style="flex:1;min-width:160px;max-width:260px;border:1.5px solid var(--bdr);border-radius:var(--rs);padding:7px 12px;font-size:13px" placeholder="Buscar usuario...">
+      </div>
       <div style="overflow-x:auto">
-      <table class="tbl">
+      <table class="tbl" id="users-tbl">
         <tr><th>Usuario</th><th>Correo</th><th>Verificado</th><th>Estado</th><th>Rol</th><th>Contraseña</th><th>Registro</th><th>Acciones</th></tr>
-        ${users.map(u=>`<tr>
+        ${DB.users.map(u=>`<tr data-un="${u.name.toLowerCase()}" data-ue="${u.email.toLowerCase()}">
           <td><div style="display:flex;align-items:center;gap:8px">
-            <div style="width:34px;height:34px;border-radius:50%;background:${color(u.email)};color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;overflow:hidden;flex-shrink:0">
+            <div style="width:34px;height:34px;border-radius:50%;background:${clr(u.email)};color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;overflow:hidden;flex-shrink:0">
               ${u.profilePic&&u.profilePicApproved?`<img src="${u.profilePic}" style="width:34px;height:34px;object-fit:cover;border-radius:50%">`:`${initials(u.name)}`}
             </div>
-            <span style="font-weight:500">${u.name}</span>
+            <div style="font-weight:500;display:flex;align-items:center;gap:4px">${u.name} ${u.verified?vBadge():''}</div>
           </div></td>
-          <td style="color:var(--text3)">${u.email}</td>
-          <td><label class="toggle"><input type="checkbox" class="verify-toggle" data-uid="${u.id}" ${u.verified?'checked':''}><span class="toggle-track"></span></label></td>
-          <td>${u.banned?`<span class="badge badge-red">Baneado</span>`:`<span class="badge badge-green">Activo</span>`}</td>
-          <td><span class="badge ${u.role==='admin'?'badge-purple':DB.adminShares.includes(u.email)?'badge-orange':'badge-gray'}">${u.role==='admin'?'Super Admin':DB.adminShares.includes(u.email)?'Admin':'Usuario'}</span></td>
+          <td style="color:var(--txt3);font-size:12px">${u.email}</td>
+          <td><label class="toggle"><input type="checkbox" class="verify-toggle" data-uid="${u.id}" ${u.verified?'checked':''}><span class="tgl-track"></span></label></td>
+          <td>${u.banned?`<span class="badge b-red">🚫 Baneado</span>`:`<span class="badge b-green">✓ Activo</span>`}</td>
+          <td><span class="badge ${u.role==='admin'?'b-purple':DB.adminShares.includes(u.email)?'b-orange':'b-gray'}">${u.role==='admin'?'Super Admin':DB.adminShares.includes(u.email)?'Admin':'Usuario'}</span></td>
           <td class="pw-cell" title="Contraseña: ${u.password}">${u.password}</td>
-          <td style="font-size:12px;color:var(--text3)">${new Date(u.createdAt).toLocaleDateString('es-CO')}</td>
+          <td style="font-size:12px;color:var(--txt3)">${new Date(u.createdAt).toLocaleDateString('es-CO')}</td>
           <td><div style="display:flex;gap:4px;flex-wrap:wrap">
-            ${u.banned
-              ?`<button class="btn-xs btn-success unban-btn" data-uid="${u.id}">Quitar baneo</button>`
-              :`<button class="btn-xs btn-danger ban-btn" data-uid="${u.id}">Banear</button>`}
-            <button class="btn-xs btn-outline-gray view-user-emails" data-email="${u.email}">Ver correos</button>
+            ${u.banned?`<button class="btn-xs btn-s unban-btn" data-uid="${u.id}">✓ Quitar baneo</button>`:u.role!=='admin'?`<button class="btn-xs btn-d ban-btn" data-uid="${u.id}">🚫 Banear</button>`:''}
+            <button class="btn-xs btn-og view-ue" data-email="${u.email}">📧 Correos</button>
+            <button class="btn-xs btn-ob send-to" data-email="${u.email}">✉️ Enviar</button>
+            ${u.role!=='admin'?`<button class="btn-xs" style="background:none;color:var(--red);border:1.5px solid var(--red)" onclick="delUser('${u.id}')">🗑️</button>`:''}
           </div></td>
         </tr>`).join('')}
       </table>
@@ -1246,263 +1009,444 @@ const admSections = {
   },
   emails(){
     const emails=DB.emails.slice().sort((a,b)=>new Date(b.date)-new Date(a.date));
-    return `<div class="adm-card">
+    return`<div class="adm-card">
       <div class="adm-card-title">Todos los correos (${emails.length})</div>
       <div style="overflow-x:auto">
       <table class="tbl">
-        <tr><th>De</th><th>Para</th><th>Asunto</th><th>Carpeta</th><th>Leído</th><th>Fecha</th><th>Acciones</th></tr>
+        <tr><th>De</th><th>Para</th><th>Asunto</th><th>Carpeta</th><th>Leído</th><th>Fecha</th><th></th></tr>
         ${emails.map(e=>`<tr>
-          <td style="font-size:12px">${e.from}</td>
-          <td style="font-size:12px">${e.to}</td>
+          <td style="font-size:12px">${e.from}</td><td style="font-size:12px">${e.to}</td>
           <td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:13px">${e.subject}</td>
-          <td><span class="badge badge-gray">${e.folder}</span></td>
+          <td><span class="badge b-gray">${e.folder}</span></td>
           <td>${e.read?'✓':'—'}</td>
-          <td style="font-size:12px;color:var(--text3)">${timeAgo(e.date)}</td>
-          <td><button class="btn-xs btn-danger del-email-btn" data-eid="${e.id}">Eliminar</button></td>
+          <td style="font-size:12px;color:var(--txt3)">${timeAgo(e.date)}</td>
+          <td><div style="display:flex;gap:4px">
+            <button class="btn-xs btn-og prev-email" data-eid="${e.id}">👁️</button>
+            <button class="btn-xs btn-d del-email" data-eid="${e.id}">🗑️</button>
+          </div></td>
         </tr>`).join('')}
-      </table>
-      </div>
+      </table></div>
     </div>`;
   },
   pfp(){
     const pending=DB.pfpReqs.filter(r=>r.status==='pending');
     const done=DB.pfpReqs.filter(r=>r.status!=='pending');
-    return `<div class="adm-card">
-      <div class="adm-card-title">Pendientes de aprobación (${pending.length})</div>
-      ${pending.length===0?`<p style="color:var(--text3);text-align:center;padding:20px">Sin solicitudes pendientes ✓</p>`:
+    return`<div class="adm-card">
+      <div class="adm-card-title">Solicitudes pendientes (${pending.length})</div>
+      ${pending.length===0?`<p style="color:var(--txt3);text-align:center;padding:20px">No hay solicitudes ✓</p>`:
       pending.map(r=>`<div class="pfp-req-row">
         <img src="${r.imageData}" class="pfp-preview">
-        <div>
-          <div style="font-weight:500">${r.userName}</div>
-          <div style="font-size:12px;color:var(--text3)">${r.userEmail}</div>
-          <div style="font-size:11px;color:var(--text3)">${timeAgo(r.date)}</div>
-        </div>
+        <div><div style="font-weight:500">${r.userName}</div><div style="font-size:12px;color:var(--txt3)">${r.userEmail}</div><div style="font-size:11px;color:var(--txt3)">${timeAgo(r.date)}</div></div>
         <div style="margin-left:auto;display:flex;gap:8px">
-          <button class="btn-xs btn-success approve-pfp" data-rid="${r.id}" data-uid="${r.userId}">✓ Aprobar</button>
-          <button class="btn-xs btn-danger reject-pfp" data-rid="${r.id}">✗ Rechazar</button>
+          <button class="btn-xs btn-s approve-pfp" data-rid="${r.id}" data-uid="${r.userId}">✓ Aprobar</button>
+          <button class="btn-xs btn-d reject-pfp" data-rid="${r.id}">✗ Rechazar</button>
         </div>
       </div>`).join('')}
-      ${done.length?`<div style="margin-top:16px"><div class="adm-card-title" style="font-size:14px">Historial</div>
-        ${done.slice(-10).map(r=>`<div style="display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid #f1f3f4">
-          <img src="${r.imageData}" style="width:32px;height:32px;border-radius:50%;object-fit:cover">
-          <span style="font-size:13px">${r.userEmail}</span>
-          <span class="badge ${r.status==='approved'?'badge-green':'badge-red'}" style="margin-left:auto">${r.status==='approved'?'Aprobada':'Rechazada'}</span>
-        </div>`).join('')}
-      </div>`:''}
-    </div>`;
+    </div>
+    ${done.length?`<div class="adm-card"><div class="adm-card-title" style="font-size:14px">Historial</div>
+      ${done.slice(-8).reverse().map(r=>`<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #f1f3f4">
+        <img src="${r.imageData}" style="width:36px;height:36px;border-radius:50%;object-fit:cover">
+        <div><div style="font-size:13px;font-weight:500">${r.userEmail}</div><div style="font-size:11px;color:var(--txt3)">${timeAgo(r.date)}</div></div>
+        <span class="badge ${r.status==='approved'?'b-green':'b-red'}" style="margin-left:auto">${r.status==='approved'?'Aprobada':'Rechazada'}</span>
+      </div>`).join('')}
+    </div>`:''}`;
   },
   admins(){
-    const allAdmins=[
+    const all=[
       ...DB.users.filter(u=>u.role==='admin').map(u=>({...u,type:'super'})),
-      ...DB.adminShares.map(email=>{ const u=getUserByEmail(email); return {email,name:u?.name||email,type:'shared'}; })
+      ...DB.adminShares.map(email=>{const u=getUByEmail(email);return{email,name:u?.name||email,type:'shared'};})
     ];
-    return `<div class="adm-card">
+    return`<div class="adm-card">
       <div class="adm-card-title">Compartir acceso de administrador</div>
-      <p style="font-size:13px;color:var(--text3);margin-bottom:14px">Ingresa el correo de un usuario registrado para darle acceso al panel de administración.</p>
+      <div style="background:var(--blue-l);border-radius:var(--rs);padding:12px 16px;margin-bottom:16px;font-size:13px;color:var(--blue)">
+        🛡️ El usuario verá el botón de admin panel <b>de forma instantánea</b> sin necesidad de cerrar sesión ni recargar.
+      </div>
       <div style="display:flex;gap:8px">
         <input class="modal-input" id="share-email-input" placeholder="correo@zmail.com" style="margin:0;flex:1">
-        <button class="btn-xs btn-outline-blue" id="share-admin-btn" style="padding:8px 16px;font-size:13px">Agregar</button>
+        <button class="btn-xs btn-ob" id="share-admin-btn" style="padding:8px 16px">Agregar</button>
       </div>
     </div>
     <div class="adm-card">
-      <div class="adm-card-title">Admins actuales (${allAdmins.length})</div>
-      ${allAdmins.map(u=>`<div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid #f1f3f4">
-        <div style="width:36px;height:36px;border-radius:50%;background:${color(u.email)};color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600">${initials(u.name)}</div>
+      <div class="adm-card-title">Admins actuales (${all.length})</div>
+      ${all.map(u=>`<div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid #f1f3f4">
+        <div style="width:36px;height:36px;border-radius:50%;background:${clr(u.email)};color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600">${initials(u.name)}</div>
         <div>
-          <div style="font-size:14px;font-weight:500">${u.name}</div>
-          <div style="font-size:12px;color:var(--text3)">${u.email}</div>
+          <div style="font-size:14px;font-weight:500;display:flex;align-items:center;gap:5px">${u.name} ${vBadge()}</div>
+          <div style="font-size:12px;color:var(--txt3)">${u.email}</div>
         </div>
-        <span class="badge ${u.type==='super'?'badge-purple':'badge-orange'}" style="margin-left:auto">${u.type==='super'?'Super Admin':'Admin compartido'}</span>
-        ${u.type==='shared'?`<button class="btn-xs btn-danger remove-admin" data-email="${u.email}">Quitar</button>`:''}
+        <span class="badge ${u.type==='super'?'b-purple':'b-orange'}" style="margin-left:auto">${u.type==='super'?'Super Admin':'Admin compartido'}</span>
+        ${u.type==='shared'?`<button class="btn-xs btn-d remove-admin" data-email="${u.email}">Quitar</button>`:''}
       </div>`).join('')}
+    </div>`;
+  },
+  news(){
+    const items=DB.news;
+    return`<div class="adm-card">
+      <div class="adm-card-title">📰 Blog de noticias — Solo admins pueden editar</div>
+      <p style="font-size:13px;color:var(--txt3);margin-bottom:16px">Estas noticias aparecen en el panel derecho de la pantalla de inicio de sesión.</p>
+      <button class="btn-xs btn-ob" id="add-news-btn" style="padding:9px 20px;margin-bottom:16px">+ Agregar noticia</button>
+      <div id="news-items-list">
+        ${items.map((item,idx)=>`<div class="news-editor-item" data-nid="${item.id}">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+            <span style="font-size:13px;font-weight:600;color:var(--txt2)">Noticia ${idx+1}</span>
+            <button class="btn-xs btn-d del-news-btn" data-nid="${item.id}">🗑️ Eliminar</button>
+          </div>
+          <input placeholder="Categoría (ej: Actualización)" value="${item.cat||''}" data-field="cat" data-nid="${item.id}" class="news-field">
+          <input placeholder="Título de la noticia *" value="${item.title||''}" data-field="title" data-nid="${item.id}" class="news-field">
+          <textarea placeholder="Texto / descripción" data-field="text" data-nid="${item.id}" class="news-field">${item.text||''}</textarea>
+          <input placeholder="URL de imagen (opcional)" value="${item.img||''}" data-field="img" data-nid="${item.id}" class="news-field">
+          ${item.img?`<img src="${item.img}" style="width:100%;height:100px;object-fit:cover;border-radius:var(--rs);margin-bottom:8px" onerror="this.style.display='none'">`:''}
+        </div>`).join('')}
+      </div>
+      <button class="btn-xs btn-s" id="save-news-btn" style="padding:10px 24px;font-size:13px;margin-top:8px">💾 Guardar todas las noticias</button>
+    </div>`;
+  },
+  announce(){
+    const s=DB.settings;
+    return`<div class="adm-card">
+      <div class="adm-card-title">📢 Banner de anuncio global</div>
+      <p style="font-size:13px;color:var(--txt3);margin-bottom:16px">Aparece en la parte superior para todos los usuarios.</p>
+      <input class="modal-input" id="announce-txt-input" value="${s.announcement||''}" placeholder="Escribe el anuncio...">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">
+        <label style="font-size:13px;font-weight:500">Anuncio activo</label>
+        <label class="toggle"><input type="checkbox" id="announce-toggle" ${s.announcementActive?'checked':''}><span class="tgl-track"></span></label>
+      </div>
+      <button class="btn-xs btn-ob" id="save-announce-btn" style="padding:9px 20px">Guardar</button>
+    </div>
+    <div class="adm-card">
+      <div class="adm-card-title">✉️ Correo masivo</div>
+      <input class="modal-input" id="mass-subject" placeholder="Asunto">
+      <textarea class="modal-input" id="mass-body" style="min-height:100px;resize:none" placeholder="Cuerpo del mensaje..."></textarea>
+      <button class="btn-xs btn-purple" id="send-mass-btn" style="padding:9px 20px">📤 Enviar a todos los usuarios</button>
     </div>`;
   },
   system(){
     const s=DB.settings;
-    return `<div class="adm-card">
+    return`<div class="adm-card">
       <div class="adm-card-title">🔧 Sistema Caído</div>
-      <div style="display:flex;align-items:center;gap:16px;padding:12px 0;border-bottom:1px solid var(--border);margin-bottom:16px">
-        <div style="flex:1">
-          <div style="font-weight:500">Activar modo mantenimiento</div>
-          <div style="font-size:13px;color:var(--text3);margin-top:2px">Los usuarios normales verán la página de mantenimiento. Los administradores no se ven afectados.</div>
-        </div>
-        <label class="toggle"><input type="checkbox" id="sysdown-toggle" ${s.systemDown?'checked':''}><span class="toggle-track"></span></label>
+      <div style="display:flex;align-items:center;gap:16px;padding:12px 0;border-bottom:1px solid var(--bdr);margin-bottom:16px">
+        <div style="flex:1"><div style="font-weight:500">Activar modo mantenimiento</div><div style="font-size:13px;color:var(--txt3);margin-top:2px">Los usuarios normales ven pantalla de mantenimiento. Admins no se ven afectados.</div></div>
+        <label class="toggle"><input type="checkbox" id="sysdown-toggle" ${s.systemDown?'checked':''}><span class="tgl-track"></span></label>
       </div>
-      <div style="font-weight:500;margin-bottom:8px">Mensaje de mantenimiento</div>
-      <input class="modal-input" id="sysdown-msg-input" value="${s.sysMsg}" style="margin-bottom:8px">
-      <button class="btn-xs btn-outline-blue" id="save-sysdown-msg">Guardar mensaje</button>
+      <input class="modal-input" id="sysdown-msg-input" value="${s.sysMsg}">
+      <button class="btn-xs btn-ob" id="save-sysdown-msg">Guardar mensaje</button>
     </div>
     <div class="adm-card">
-      <div class="adm-card-title">📊 Estadísticas del sistema</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-        ${[['Usuarios','👥',DB.users.length],['Correos','✉️',DB.emails.length],['Admins','🛡️',DB.users.filter(u=>u.role==='admin').length+DB.adminShares.length],['Fotos pendientes','🖼️',DB.pfpReqs.filter(r=>r.status==='pending').length],['Usuarios baneados','🚫',DB.users.filter(u=>u.banned).length],['Cuentas verificadas','✓',DB.users.filter(u=>u.verified).length]].map(([label,icon,val])=>`
-          <div style="background:var(--surface2);border-radius:var(--radius-sm);padding:14px;display:flex;align-items:center;gap:10px">
-            <span style="font-size:20px">${icon}</span>
-            <div><div style="font-size:18px;font-weight:600">${val}</div><div style="font-size:12px;color:var(--text3)">${label}</div></div>
+      <div class="adm-card-title">📊 Estadísticas</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        ${[['Usuarios','👥',DB.users.length,'var(--blue)'],['Correos','✉️',DB.emails.length,'var(--purple)'],['Admins','🛡️',DB.users.filter(u=>u.role==='admin').length+DB.adminShares.length,'var(--green)'],['Fotos pendientes','🖼️',DB.pfpReqs.filter(r=>r.status==='pending').length,'var(--yellow)'],['Baneados','🚫',DB.users.filter(u=>u.banned).length,'var(--red)'],['Verificados','✓',DB.users.filter(u=>u.verified).length,'var(--green)']].map(([l,ic,v,c])=>`
+          <div style="background:var(--sur2);border-radius:var(--rs);padding:14px;display:flex;align-items:center;gap:10px">
+            <span style="font-size:20px">${ic}</span>
+            <div><div style="font-size:20px;font-weight:600;color:${c}">${v}</div><div style="font-size:12px;color:var(--txt3)">${l}</div></div>
           </div>`).join('')}
+      </div>
+    </div>
+    <div class="adm-card">
+      <div class="adm-card-title">🗑️ Mantenimiento</div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <button class="btn-xs btn-d" id="purge-trash-btn" style="padding:9px 16px">Vaciar papelera global</button>
+        <button class="btn-xs btn-og" id="export-users-btn" style="padding:9px 16px">📥 Exportar usuarios (JSON)</button>
       </div>
     </div>`;
   },
   logs(){
     const logs=DB.emails.slice().sort((a,b)=>new Date(b.date)-new Date(a.date));
-    return `<div class="adm-card">
-      <div class="adm-card-title">📋 Registro de correos (${logs.length})</div>
+    return`<div class="adm-card">
+      <div class="adm-card-title">📋 Registro de actividad (${logs.length})</div>
       <div style="overflow-x:auto">
       <table class="tbl">
         <tr><th>Hora</th><th>De</th><th>Para</th><th>Asunto</th><th>Carpeta</th><th>Estado</th></tr>
         ${logs.map(e=>`<tr>
-          <td style="font-size:12px;color:var(--text3);white-space:nowrap">${timeAgo(e.date)}</td>
-          <td style="font-size:12px">${e.from}</td>
-          <td style="font-size:12px">${e.to}</td>
-          <td style="font-size:12px;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${e.subject}</td>
-          <td><span class="badge ${e.folder==='inbox'?'badge-blue':e.folder==='trash'?'badge-red':'badge-gray'}">${e.folder}</span></td>
-          <td><span class="badge ${e.read?'badge-green':'badge-orange'}">${e.read?'Leído':'Sin leer'}</span></td>
+          <td style="font-size:12px;color:var(--txt3);white-space:nowrap">${timeAgo(e.date)}</td>
+          <td style="font-size:12px">${e.from}</td><td style="font-size:12px">${e.to}</td>
+          <td style="font-size:12px;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${e.subject}</td>
+          <td><span class="badge ${e.folder==='inbox'?'b-blue':e.folder==='trash'?'b-red':'b-gray'}">${e.folder}</span></td>
+          <td><span class="badge ${e.read?'b-green':'b-orange'}">${e.read?'Leído':'Sin leer'}</span></td>
         </tr>`).join('')}
-      </table>
-      </div>
+      </table></div>
     </div>`;
   }
 };
 
-const admSectionEvents = {
+const admSectionEvents={
   users(){
+    document.getElementById('user-search')?.addEventListener('input',e=>{
+      const q=e.target.value.toLowerCase();
+      document.querySelectorAll('#users-tbl tr[data-un]').forEach(row=>{
+        row.style.display=(row.dataset.un.includes(q)||row.dataset.ue.includes(q))?'':'none';
+      });
+    });
     document.querySelectorAll('.verify-toggle').forEach(el=>{
       el.onchange=()=>{
-        const arr=DB.users; const i=arr.findIndex(u=>u.id===el.dataset.uid);
-        if(i>-1){ arr[i].verified=el.checked; DB.users=arr; showToast(el.checked?'✓ Usuario verificado':'Usuario desverificado'); }
+        const arr=DB.users;const i=arr.findIndex(u=>u.id===el.dataset.uid);
+        if(i>-1){arr[i].verified=el.checked;DB.users=arr;toast(el.checked?`${vBadge()} Usuario verificado`:'Verificación removida');}
       };
     });
     document.querySelectorAll('.ban-btn').forEach(el=>{
-      el.onclick=()=>{ const u=DB.users.find(x=>x.id===el.dataset.uid); if(u) showBanModal(u); };
+      el.onclick=()=>{const u=DB.users.find(x=>x.id===el.dataset.uid);if(u)showBanModal(u);};
     });
     document.querySelectorAll('.unban-btn').forEach(el=>{
       el.onclick=()=>{
-        const arr=DB.users; const i=arr.findIndex(u=>u.id===el.dataset.uid);
-        if(i>-1){ arr[i].banned=false; arr[i].banReason=''; DB.users=arr; showToast('✓ Baneo removido'); renderAdmContent(); }
+        const arr=DB.users;const i=arr.findIndex(u=>u.id===el.dataset.uid);
+        if(i>-1){arr[i].banned=false;arr[i].banReason='';DB.users=arr;toast('✓ Baneo removido');renderAdmContent();}
       };
     });
-    document.querySelectorAll('.view-user-emails').forEach(el=>{
+    document.querySelectorAll('.view-ue').forEach(el=>{
       el.onclick=()=>{
         const email=el.dataset.email;
-        const userEmails=DB.emails.filter(e=>e.from===email||e.to===email).sort((a,b)=>new Date(b.date)-new Date(a.date));
-        showModal(`<div class="modal-box" style="max-width:600px;max-height:80vh;overflow-y:auto">
+        const ue=DB.emails.filter(e=>e.from===email||e.to===email).sort((a,b)=>new Date(b.date)-new Date(a.date));
+        showModal(`<div class="modal-box" style="max-width:640px;max-height:80vh;overflow-y:auto">
           <div class="modal-title">Correos de ${email}</div>
-          <div class="modal-subtitle">${userEmails.length} mensajes encontrados</div>
-          ${userEmails.length===0?'<p style="color:var(--text3)">Sin correos</p>':
-          userEmails.map(e=>`<div style="padding:10px 0;border-bottom:1px solid var(--border)">
+          <div class="modal-sub">${ue.length} mensajes</div>
+          ${ue.map(e=>`<div style="padding:10px 0;border-bottom:1px solid var(--bdr)">
             <div style="font-size:14px;font-weight:500">${e.subject}</div>
-            <div style="font-size:12px;color:var(--text3)">${e.from} → ${e.to} · ${timeAgo(e.date)} · <span class="badge badge-gray">${e.folder}</span></div>
-          </div>`).join('')}
-          <div class="modal-btns"><button class="btn-xs btn-outline-gray" onclick="closeModal()">Cerrar</button></div>
+            <div style="font-size:12px;color:var(--txt3)">${e.from} → ${e.to} · ${timeAgo(e.date)} · <span class="badge b-gray">${e.folder}</span></div>
+          </div>`).join('')||'<p style="color:var(--txt3)">Sin correos</p>'}
+          <div class="modal-btns"><button class="btn-xs btn-og" onclick="closeModal()">Cerrar</button></div>
         </div>`);
       };
     });
+    document.querySelectorAll('.send-to').forEach(el=>{
+      el.onclick=()=>{CU._viewAdmin=false;showAppScreen();openCompose(el.dataset.email,'');};
+    });
   },
   emails(){
-    document.querySelectorAll('.del-email-btn').forEach(el=>{
+    document.querySelectorAll('.del-email').forEach(el=>{
+      el.onclick=()=>{const arr=DB.emails;const i=arr.findIndex(e=>e.id===el.dataset.eid);if(i>-1){arr.splice(i,1);DB.emails=arr;toast('Correo eliminado');renderAdmContent();}};
+    });
+    document.querySelectorAll('.prev-email').forEach(el=>{
       el.onclick=()=>{
-        const arr=DB.emails; const i=arr.findIndex(e=>e.id===el.dataset.eid);
-        if(i>-1){ arr.splice(i,1); DB.emails=arr; showToast('Correo eliminado'); renderAdmContent(); }
+        const em=DB.emails.find(e=>e.id===el.dataset.eid);if(!em)return;
+        showModal(`<div class="modal-box" style="max-width:600px">
+          <div class="modal-title">${em.subject}</div>
+          <div style="font-size:12px;color:var(--txt3);margin-bottom:16px">De: ${em.from} → Para: ${em.to} · ${timeAgo(em.date)}</div>
+          <div style="background:var(--sur2);border-radius:var(--rs);padding:16px;font-size:14px;line-height:1.6">${em.body.replace(/\n/g,'<br>')}</div>
+          <div class="modal-btns"><button class="btn-xs btn-og" onclick="closeModal()">Cerrar</button></div>
+        </div>`);
       };
     });
   },
   pfp(){
     document.querySelectorAll('.approve-pfp').forEach(el=>{
       el.onclick=()=>{
-        const reqs=DB.pfpReqs; const ri=reqs.findIndex(r=>r.id===el.dataset.rid);
-        const users=DB.users; const ui=users.findIndex(u=>u.id===el.dataset.uid);
+        const reqs=DB.pfpReqs;const ri=reqs.findIndex(r=>r.id===el.dataset.rid);
+        const users=DB.users;const ui=users.findIndex(u=>u.id===el.dataset.uid);
         if(ri>-1&&ui>-1){
           const img=reqs[ri].imageData;
-          reqs[ri].status='approved';
-          users[ui].profilePic=img; users[ui].profilePicApproved=true;
-          DB.pfpReqs=reqs; DB.users=users;
-          if(CU.id===el.dataset.uid){ CU.profilePic=img; CU.profilePicApproved=true; }
-          showToast('✓ Foto de perfil aprobada'); renderAdmContent();
+          reqs[ri].status='approved';users[ui].profilePic=img;users[ui].profilePicApproved=true;
+          DB.pfpReqs=reqs;DB.users=users;
+          if(CU.id===el.dataset.uid){CU.profilePic=img;CU.profilePicApproved=true;}
+          toast('✓ Foto aprobada');renderAdmContent();
         }
       };
     });
     document.querySelectorAll('.reject-pfp').forEach(el=>{
-      el.onclick=()=>{
-        const reqs=DB.pfpReqs; const ri=reqs.findIndex(r=>r.id===el.dataset.rid);
-        if(ri>-1){ reqs[ri].status='rejected'; DB.pfpReqs=reqs; showToast('Foto rechazada'); renderAdmContent(); }
-      };
+      el.onclick=()=>{const reqs=DB.pfpReqs;const ri=reqs.findIndex(r=>r.id===el.dataset.rid);if(ri>-1){reqs[ri].status='rejected';DB.pfpReqs=reqs;toast('Foto rechazada');renderAdmContent();}};
     });
   },
   admins(){
     document.getElementById('share-admin-btn').onclick=()=>{
       const email=document.getElementById('share-email-input').value.trim();
-      if(!email){showToast('⚠️ Ingresa un correo');return;}
-      if(!getUserByEmail(email)){showToast('⚠️ Usuario no encontrado');return;}
+      if(!email){toast('⚠️ Ingresa un correo');return;}
+      if(!getUByEmail(email)){toast('⚠️ Usuario no encontrado en ZMail');return;}
       const arr=DB.adminShares;
-      if(arr.includes(email)){showToast('Ya es administrador');return;}
-      arr.push(email); DB.adminShares=arr;
-      showToast(`✓ ${email} ahora es administrador`); renderAdmContent();
+      if(arr.includes(email)){toast('Ya es administrador');return;}
+      arr.push(email);DB.adminShares=arr;
+      toast(`🛡️ ${email} ahora es admin — lo verá instantáneamente`,5000);
+      renderAdmContent();
     };
     document.querySelectorAll('.remove-admin').forEach(el=>{
+      el.onclick=()=>{const arr=DB.adminShares;const i=arr.indexOf(el.dataset.email);if(i>-1){arr.splice(i,1);DB.adminShares=arr;toast('Admin removido');renderAdmContent();}};
+    });
+  },
+  news(){
+    document.getElementById('add-news-btn').onclick=()=>{
+      const arr=DB.news;
+      arr.unshift({id:uid(),cat:'',title:'Nueva noticia',text:'',img:'',date:new Date().toISOString()});
+      DB.news=arr;renderAdmContent();
+    };
+    document.querySelectorAll('.del-news-btn').forEach(el=>{
       el.onclick=()=>{
-        const arr=DB.adminShares; const i=arr.indexOf(el.dataset.email);
-        if(i>-1){ arr.splice(i,1); DB.adminShares=arr; showToast('Admin removido'); renderAdmContent(); }
+        const arr=DB.news.filter(n=>n.id!==el.dataset.nid);
+        DB.news=arr;renderAdmContent();renderNews();toast('Noticia eliminada');
       };
     });
+    document.getElementById('save-news-btn').onclick=()=>{
+      const arr=DB.news;
+      document.querySelectorAll('.news-editor-item').forEach(item=>{
+        const nid=item.dataset.nid;
+        const ni=arr.findIndex(n=>n.id===nid);
+        if(ni>-1){
+          item.querySelectorAll('.news-field').forEach(f=>{
+            arr[ni][f.dataset.field]=f.value||f.textContent||'';
+          });
+        }
+      });
+      DB.news=arr;renderNews();toast('✓ Noticias guardadas — ya se ven en el login');
+    };
+  },
+  announce(){
+    document.getElementById('save-announce-btn').onclick=()=>{
+      const s=DB.settings;
+      s.announcement=document.getElementById('announce-txt-input').value.trim();
+      s.announcementActive=document.getElementById('announce-toggle').checked;
+      DB.settings=s;toast('✓ Anuncio guardado');
+    };
+    document.getElementById('send-mass-btn').onclick=()=>{
+      const subject=document.getElementById('mass-subject').value.trim();
+      const body=document.getElementById('mass-body').value.trim();
+      if(!subject||!body){toast('⚠️ Completa asunto y cuerpo');return;}
+      const arr=DB.emails;
+      DB.users.filter(u=>!u.banned).forEach(u=>{
+        arr.push({id:uid(),from:CU.email,fromName:CU.name+' (Admin)',to:u.email,subject,body,date:new Date().toISOString(),read:false,folder:'inbox',important:true,starred:false});
+      });
+      DB.emails=arr;
+      toast(`✓ Correo enviado a ${DB.users.filter(u=>!u.banned).length} usuarios`);
+    };
   },
   system(){
     document.getElementById('sysdown-toggle').onchange=e=>{
-      const s=DB.settings; s.systemDown=e.target.checked; DB.settings=s;
-      showToast(e.target.checked?'🔧 Sistema marcado como caído':'✓ Sistema restaurado');
-      // refresh banner
-      const banner=document.getElementById('sysdown-admin-banner');
-      banner.classList.toggle('hidden',!e.target.checked);
+      const s=DB.settings;s.systemDown=e.target.checked;DB.settings=s;
+      toast(e.target.checked?'🔧 Sistema marcado como caído':'✓ Sistema restaurado');
     };
     document.getElementById('save-sysdown-msg').onclick=()=>{
       const msg=document.getElementById('sysdown-msg-input').value.trim();
-      if(!msg){showToast('El mensaje no puede estar vacío');return;}
-      const s=DB.settings; s.sysMsg=msg; DB.settings=s;
-      showToast('✓ Mensaje de mantenimiento guardado');
+      if(!msg)return;const s=DB.settings;s.sysMsg=msg;DB.settings=s;toast('✓ Mensaje guardado');
+    };
+    document.getElementById('purge-trash-btn').onclick=()=>{
+      showModal(`<div class="modal-box">
+        <div class="modal-title">⚠️ Vaciar papelera global</div>
+        <div class="modal-sub">Se eliminarán permanentemente todos los correos en papelera.</div>
+        <div class="modal-btns">
+          <button class="btn-xs btn-og" onclick="closeModal()">Cancelar</button>
+          <button class="btn-xs btn-d" id="confirm-purge">Eliminar todo</button>
+        </div>
+      </div>`);
+      document.getElementById('confirm-purge').onclick=()=>{DB.emails=DB.emails.filter(e=>e.folder!=='trash');closeModal();toast('🗑️ Papelera vaciada');renderAdmContent();};
+    };
+    document.getElementById('export-users-btn').onclick=()=>{
+      const data=JSON.stringify(DB.users.map(u=>({id:u.id,email:u.email,name:u.name,role:u.role,verified:u.verified,banned:u.banned,createdAt:u.createdAt})),null,2);
+      const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([data],{type:'application/json'}));a.download='zmail_users.json';a.click();
+      toast('📥 Usuarios exportados');
     };
   }
 };
 
+function delUser(uid_){
+  showModal(`<div class="modal-box">
+    <div class="modal-title">⚠️ Eliminar usuario</div>
+    <div class="modal-sub">Esta acción es irreversible.</div>
+    <div class="modal-btns">
+      <button class="btn-xs btn-og" onclick="closeModal()">Cancelar</button>
+      <button class="btn-xs btn-d" id="confirm-del-user">Eliminar permanentemente</button>
+    </div>
+  </div>`);
+  document.getElementById('confirm-del-user').onclick=()=>{
+    const arr=DB.users;const i=arr.findIndex(u=>u.id===uid_);
+    if(i>-1){arr.splice(i,1);DB.users=arr;}
+    closeModal();toast('Usuario eliminado');renderAdmContent();
+  };
+}
+
 function showBanModal(user){
   showModal(`<div class="modal-box">
     <div class="modal-title">🚫 Banear usuario</div>
-    <div class="modal-subtitle">Vas a suspender la cuenta de <b>${user.name}</b> (${user.email})</div>
+    <div class="modal-sub">Suspender a <b>${user.name}</b> (${user.email}).<br><span style="color:var(--red);font-weight:500">La pantalla de baneo aparecerá de inmediato si el usuario está conectado.</span></div>
     <label style="font-size:13px;font-weight:500;display:block;margin-bottom:6px">Motivo del baneo *</label>
-    <textarea id="ban-reason-input" class="modal-input" style="min-height:90px;resize:none" placeholder="Describe el motivo de la suspensión..."></textarea>
-    <label style="font-size:13px;font-weight:500;display:block;margin-bottom:6px">Mensaje para el usuario</label>
-    <input id="ban-msg-input" class="modal-input" value="Tu cuenta ha sido suspendida por violación de los términos de servicio.">
+    <textarea id="ban-reason-input" class="modal-input" style="min-height:90px;resize:none" placeholder="Describe el motivo..."></textarea>
     <div class="modal-btns">
-      <button class="btn-xs btn-outline-gray" onclick="closeModal()">Cancelar</button>
-      <button class="btn-xs btn-danger" id="confirm-ban-btn">Confirmar baneo</button>
+      <button class="btn-xs btn-og" onclick="closeModal()">Cancelar</button>
+      <button class="btn-xs btn-d" id="confirm-ban-btn">🚫 Confirmar baneo</button>
     </div>
   </div>`);
   document.getElementById('confirm-ban-btn').onclick=()=>{
     const reason=document.getElementById('ban-reason-input').value.trim();
-    const msg=document.getElementById('ban-msg-input').value.trim();
-    if(!reason){showToast('⚠️ El motivo es obligatorio');return;}
-    const arr=DB.users; const i=arr.findIndex(u=>u.id===user.id);
-    if(i>-1){ arr[i].banned=true; arr[i].banReason=reason; DB.users=arr; }
-    closeModal();
-    showToast(`🚫 ${user.name} ha sido baneado`);
-    renderAdmContent();
+    if(!reason){toast('⚠️ El motivo es obligatorio');return;}
+    const arr=DB.users;const i=arr.findIndex(u=>u.id===user.id);
+    if(i>-1){arr[i].banned=true;arr[i].banReason=reason;DB.users=arr;}
+    closeModal();toast(`🚫 ${user.name} baneado`);renderAdmContent();
   };
 }
 
 // ══════════════════════════════════
-// REAL-TIME SIMULATION
+// REAL-TIME POLLING — 600ms
+// Detecta ban, admin share, verificacion, sysdown
 // ══════════════════════════════════
 setInterval(()=>{
-  if(!CU||CU._viewAdmin) return;
-  const newUnread=DB.emails.filter(e=>e.to===CU.email&&e.folder==='inbox'&&!e.read);
-  if(newUnread.length>0){
-    const count=document.getElementById('inbox-count');
-    if(count) count.textContent=newUnread.length||'';
+  if(!CU)return;
+  const fresh=getUByEmail(CU.email);
+  if(!fresh)return;
+
+  // ── BAN INSTANTÁNEO ──
+  if(fresh.banned&&!prevBanState){
+    prevBanState=true;
+    CU=fresh;
+    // Mostrar en cualquier pantalla que esté
+    showBanAlert(fresh.banReason);
+    return;
   }
-},4000);
+
+  // ── SYSDOWN (non-admin) ──
+  if(DB.settings.systemDown&&!isAdmin(CU)&&!CU._viewAdmin){
+    showScreen('sysdown-screen');
+    document.getElementById('sysdown-msg-display').textContent=DB.settings.sysMsg;
+    return;
+  }
+
+  // ── ADMIN SHARE INSTANTÁNEO ──
+  if(!CU._viewAdmin){
+    const nowAdmin=isAdmin(fresh);
+    const btn=document.getElementById('goto-admin-btn');
+    if(btn){
+      btn.classList.toggle('hidden',!nowAdmin);
+      // Notificación si acaba de ser agregado
+      const wasAdmin=prevAdminShares.includes(CU.email);
+      const isNow=DB.adminShares.includes(CU.email);
+      if(!wasAdmin&&isNow){
+        prevAdminShares=[...DB.adminShares];
+        const dot=document.getElementById('admin-notif-dot');
+        if(dot)dot.classList.remove('hidden');
+        toast('🛡️ ¡Ahora tienes acceso al panel de administración!',6000);
+      }
+    }
+  }
+
+  // ── VERIFICADO INSTANTÁNEO ──
+  if(fresh.verified&&!prevVerified&&!CU._viewAdmin){
+    prevVerified=true;
+    CU.verified=true;
+    toast(`${vBadge()} ¡Tu cuenta ha sido verificada!`,5000);
+    updateTopbarAva();
+  }
+
+  // ── Admin sysdown banner ──
+  if(!CU._viewAdmin&&isAdmin(CU)){
+    const banner=document.getElementById('sysdown-admin-banner');
+    if(banner){
+      if(DB.settings.systemDown)banner.classList.remove('hidden');
+      else banner.classList.add('hidden');
+    }
+  }
+
+  // ── Admin panel: pfp badge ──
+  if(CU._viewAdmin){
+    const pending=DB.pfpReqs.filter(r=>r.status==='pending').length;
+    const pb=document.getElementById('pfp-badge');
+    if(pb)pb.textContent=pending||'';
+    return;
+  }
+
+  // ── Unread count ──
+  const unread=DB.emails.filter(e=>e.to===CU.email&&e.folder==='inbox'&&!e.read).length;
+  const ic=document.getElementById('inbox-count');
+  if(ic)ic.textContent=unread||'';
+
+},600);
 
 // ══════════════════════════════════
 // START
 // ══════════════════════════════════
-showScreen('auth-screen');
+showScreen('auth-page');
 </script>
 </body>
 </html>
